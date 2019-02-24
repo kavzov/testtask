@@ -1,5 +1,5 @@
 import psycopg2
-from db_settings import *
+from db_settings import host, port, db_name, db_user, db_user_passw
 
 
 def reset_cat_color_info():

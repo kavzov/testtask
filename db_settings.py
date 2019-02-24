@@ -1,4 +1,4 @@
-""" Postgresql database settings """
+""" DB settings """
 
 host = 'localhost'
 port = 5432

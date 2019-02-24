@@ -1,6 +1,6 @@
 import psycopg2
 import psycopg2.extras
-from db_settings import *
+from db_settings import host, port, db_name, db_user, db_user_passw
 
 
 def get_colors():
