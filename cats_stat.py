@@ -1,0 +1,83 @@
+import psycopg2
+import psycopg2.extras
+import statistics
+from collections import Counter
+from db_settings import host, port, db_name, db_user, db_user_passw
+
+
+def get_tail_and_whiskers_lengths():
+    """ Fetch tails and whiskers lengths and return them as list of dicts """
+    with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            query = 'SELECT tail_length, whiskers_length FROM cats'
+            cur.execute(query)
+            res = cur.fetchall()
+    return res
+
+
+def get_length_mean(lengths):
+    """ Return average value of lengths """
+    length_mean = sum(lengths)/len(lengths)
+    return round(length_mean, 1)
+
+
+def get_length_median(lengths):
+    """ Return median of lengths """
+    return statistics.median(lengths)
+
+
+def get_length_mode(lengths):
+    """  Return list of the most common values of lst """
+    # list of tuples (value, count) SORTED by count
+    counts = Counter(lengths).most_common()
+
+    # first element - max count
+    # its value to mode list
+    stat_mode = [counts[0][0]]
+
+    # max count of the value
+    max_count = counts[0][1]
+
+    # check for other values is stat mode too (its count equals max_count), append them to stat_mode
+    if len(counts) > 1:
+        for i in range(1, len(counts)):
+            if counts[i][1] == max_count:
+                stat_mode.append(counts[i][0])
+            else:
+                break
+    return stat_mode
+
+
+def stat_to_db(*values):
+    """ Insert stat to db """
+    with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
+        with conn.cursor() as cur:
+            query = "INSERT INTO cats_stat VALUES (%s, %s, %s, %s, %s, %s)"
+            cur.execute(query, values)
+            conn.commit()
+
+
+# ----------- Main ----------- #
+
+
+def run():
+    tails_and_whiskers = get_tail_and_whiskers_lengths()
+
+    tails = [tail['tail_length'] for tail in tails_and_whiskers]
+    whiskers = [wh['whiskers_length'] for wh in tails_and_whiskers]
+
+    tail_length_mean = get_length_mean(tails)
+    whiskers_length_mean = get_length_mean(whiskers)
+
+    tail_length_median = statistics.median(tails)
+    whiskers_length_median = statistics.median(whiskers)
+
+    tail_length_mode = get_length_mode(tails)
+    whiskers_length_mode = get_length_mode(whiskers)
+
+    stat_to_db(tail_length_mean, tail_length_median, tail_length_mode,
+               whiskers_length_mean, whiskers_length_median, whiskers_length_mode)
+
+
+if __name__ == '__main__':
+    run()
