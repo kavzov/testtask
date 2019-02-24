@@ -1,5 +1,6 @@
 import psycopg2
 import psycopg2.extras
+from db_settings import *
 
 
 def get_colors():
@@ -58,12 +59,6 @@ def inc_color_counter(color):
 
 # ----------- Main ----------- #
 
-
-host = 'localhost'
-port = 5432
-db_name = 'wg_forge_db'
-db_user = 'wg_forge'
-db_user_passw = '42a'
 
 colors = get_colors()
 cats_colors = get_cats_colors()
