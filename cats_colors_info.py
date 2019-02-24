@@ -47,7 +47,7 @@ def cats_colors_info_to_db(counters):
             psycopg2.extras.execute_values(cur, query, counters.items())
         except psycopg2.Error as e:
             print(e)
-        # conn.commit()
+        conn.commit()
     conn.close()
 
 
