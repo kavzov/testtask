@@ -2,6 +2,7 @@ import psycopg2
 
 
 def reset_cat_color_info():
+    """ Delete all info from 'cat_color_info' table """
     host = 'localhost'
     port = 5432
     db_name = 'wg_forge_db'
