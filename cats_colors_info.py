@@ -5,35 +5,24 @@ from db_settings import host, port, db_name, db_user, db_user_passw
 
 def get_colors():
     """ Extract available cats colors from 'cat_color_info' type of db and return them as list """
-    conn = psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port)
-    query = 'SELECT unnest(enum_range(NULL::cat_color))'
-    with conn.cursor() as cur:
-        try:
+    with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
+        with conn.cursor() as cur:
+            query = 'SELECT unnest(enum_range(NULL::cat_color))'
             cur.execute(query)
-        except psycopg2.Error as e:
-            print(e)
-
-        # results as singleton tuples list
-        res = cur.fetchall()
-    conn.close()
-
+            # results as singleton tuples list
+            res = cur.fetchall()
     # return results as colors list
     return [color[0] for color in res]
 
 
 def get_cats_colors():
     """ Get all cats colors and return them as list """
-    conn = psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port)
-    query = 'SELECT color FROM cats'
-    with conn.cursor() as cur:
-        try:
+    with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
+        with conn.cursor() as cur:
+            query = 'SELECT color FROM cats'
             cur.execute(query)
-        except psycopg2.Error as e:
-            print(e)
-
-        # results as singleton tuples list
-        res = cur.fetchall()
-    conn.close()
+            # results as singleton tuples list
+            res = cur.fetchall()
 
     # return results as cats colors list
     return [color[0] for color in res]
@@ -41,15 +30,11 @@ def get_cats_colors():
 
 def cats_colors_info_to_db(counters):
     """ Insert cats colors stat info to db """
-    conn = psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port)
-    query = 'INSERT INTO cat_colors_info (color, count) VALUES %s'
-    with conn.cursor() as cur:
-        try:
+    with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
+        with conn.cursor() as cur:
+            query = 'INSERT INTO cat_colors_info (color, count) VALUES %s'
             psycopg2.extras.execute_values(cur, query, counters.items())
-        except psycopg2.Error as e:
-            print(e)
-        conn.commit()
-    conn.close()
+            conn.commit()
 
 
 def inc_color_counter(color):
