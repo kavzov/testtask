@@ -7,26 +7,30 @@ def run():
     # Socket settings
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(('', 8080))
-    server_socket.listen(1)
+    server_socket.listen()
 
     while True:
         response_msg = 'Cats service. Version 0.1\n'
 
-        # Accept data at socket
-        conn, addr = server_socket.accept()
+        # Receive data from client socket
+        client_socket = server_socket.accept()[0]
+        data = client_socket.recv(1024).decode('utf-8')
 
         # Get request path from request headers
-        path = conn.recv(1024).decode().split(' ')[1]
+        try:
+            path = data.split(' ')[1]
+        except (AttributeError, IndexError):
+            path = None
 
         # if path is not '/ping' set empty response message
         if path != proper_path:
             response_msg = '\n'
 
         # Send message to client
-        conn.send(response_msg.encode())
+        client_socket.send(response_msg.encode('utf-8'))
 
         # Close connection with client
-        conn.close()
+        client_socket.close()
 
 
 if __name__ == '__main__':
