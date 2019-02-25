@@ -2,15 +2,18 @@ import psycopg2
 import psycopg2.extras
 import statistics
 from collections import Counter
-from db_settings import host, port, db_name, db_user, db_user_passw
+from db_connect import db_connect
 
 
 def get_tail_and_whiskers_lengths():
     """ Fetch tails and whiskers lengths and return them as list of dicts """
-    with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
+    with db_connect() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             query = 'SELECT tail_length, whiskers_length FROM cats'
-            cur.execute(query)
+            try:
+                cur.execute(query)
+            except psycopg2.Error as e:
+                print("Psycopg2 error: ", e)
             res = cur.fetchall()
     return res
 
@@ -51,7 +54,7 @@ def get_length_mode(lengths):
 
 def stat_to_db(*values):
     """ Insert stat to db """
-    with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
+    with db_connect() as conn:
         with conn.cursor() as cur:
             query = "INSERT INTO cats_stat VALUES (%s, %s, %s, %s, %s, %s)"
             try:

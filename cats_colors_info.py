@@ -1,14 +1,17 @@
 import psycopg2
 import psycopg2.extras
-from db_settings import host, port, db_name, db_user, db_user_passw
+from db_connect import db_connect
 
 
 def get_colors():
     """ Extract available cats colors from 'cat_color_info' type of db and return them as list """
-    with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
+    with db_connect() as conn:
         with conn.cursor() as cur:
             query = 'SELECT unnest(enum_range(NULL::cat_color))'
-            cur.execute(query)
+            try:
+                cur.execute(query)
+            except psycopg2.Error as e:
+                print("Psycopg2 error: ", e)
             # results as singleton tuples list
             res = cur.fetchall()
     # return results as colors list
@@ -17,28 +20,28 @@ def get_colors():
 
 def get_cats_colors():
     """ Get all cats colors and return them as list """
-    with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
+    with db_connect() as conn:
         with conn.cursor() as cur:
             query = 'SELECT color FROM cats'
-            cur.execute(query)
+            try:
+                cur.execute(query)
+            except psycopg2.Error as e:
+                print("Psycopg2 error: ", e)
             # results as singleton tuples list
             res = cur.fetchall()
-
     # return results as cats colors list
     return [color[0] for color in res]
 
 
 def cats_colors_info_to_db(counters):
     """ Insert cats colors stat info to db """
-    with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
+    with db_connect() as conn:
         with conn.cursor() as cur:
             query = 'INSERT INTO cat_colors_info (color, count) VALUES %s'
             try:
                 psycopg2.extras.execute_values(cur, query, counters.items())
             except psycopg2.Error as e:
                 print("Psycopg2 error: ", e)
-            else:
-                conn.commit()
 
 
 def inc_color_counter(color):
