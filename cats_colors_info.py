@@ -33,8 +33,12 @@ def cats_colors_info_to_db(counters):
     with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
         with conn.cursor() as cur:
             query = 'INSERT INTO cat_colors_info (color, count) VALUES %s'
-            psycopg2.extras.execute_values(cur, query, counters.items())
-            conn.commit()
+            try:
+                psycopg2.extras.execute_values(cur, query, counters.items())
+            except psycopg2.Error as e:
+                print("Psycopg2 error: ", e)
+            else:
+                conn.commit()
 
 
 def inc_color_counter(color):

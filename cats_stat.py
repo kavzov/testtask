@@ -53,8 +53,8 @@ def stat_to_db(*values):
     """ Insert stat to db """
     with psycopg2.connect(dbname=db_name, user=db_user, password=db_user_passw, host=host, port=port) as conn:
         with conn.cursor() as cur:
+            query = "INSERT INTO cats_stat VALUES (%s, %s, %s, %s, %s, %s)"
             try:
-                query = "INSERT INTO cats_stat VALUES (%s, %s, %s, %s, %s, %s)"
                 cur.execute(query, values)
             except psycopg2.Error as e:
                 print("Psycopg2 error: ", e)
