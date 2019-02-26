@@ -2,7 +2,7 @@ import socket
 
 
 def run():
-    proper_path = '/ping'
+    valid_path = '/ping'
 
     # Socket settings
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -23,7 +23,7 @@ def run():
             path = None
 
         # if path is not '/ping' set empty response message
-        if path != proper_path:
+        if path != valid_path:
             response_msg = '\n'
 
         # Send message to client
