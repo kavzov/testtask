@@ -1,10 +1,10 @@
 import psycopg2
-from db_connect import db_connect
+from db_connect import connect
 
 
 def reset_cat_color_info():
     """ Delete all info from 'cat_color_info' table """
-    with db_connect() as conn:
+    with connect() as conn:
         with conn.cursor() as cur:
             query = 'DELETE FROM cat_colors_info'
             try:

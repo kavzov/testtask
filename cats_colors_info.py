@@ -1,11 +1,11 @@
 import psycopg2
 import psycopg2.extras
-from db_connect import db_connect
+from db_connect import connect
 
 
 def get_colors():
     """ Extract available cats colors from 'cat_color_info' type of db and return them as list """
-    with db_connect() as conn:
+    with connect() as conn:
         with conn.cursor() as cur:
             query = 'SELECT unnest(enum_range(NULL::cat_color))'
             try:
@@ -20,7 +20,7 @@ def get_colors():
 
 def get_cats_colors():
     """ Get all cats colors and return them as list """
-    with db_connect() as conn:
+    with connect() as conn:
         with conn.cursor() as cur:
             query = 'SELECT color FROM cats'
             try:
@@ -35,7 +35,7 @@ def get_cats_colors():
 
 def cats_colors_info_to_db(counters):
     """ Insert cats colors stat info to db """
-    with db_connect() as conn:
+    with connect() as conn:
         with conn.cursor() as cur:
             query = 'INSERT INTO cat_colors_info (color, count) VALUES %s'
             try:
@@ -44,23 +44,22 @@ def cats_colors_info_to_db(counters):
                 print("Psycopg2 error: ", e)
 
 
-def inc_color_counter(color):
-    """ Increment color counter """
-    cats_colors_counters[color] += 1
-
-
 # ----------- Main ----------- #
 
+def run():
+    colors = get_colors()
+    cats_colors = get_cats_colors()
 
-colors = get_colors()
-cats_colors = get_cats_colors()
+    # dict with cats colors counters init with 0 like {'black': 0, 'white': 0, ...}
+    cats_colors_counters = dict.fromkeys(colors, 0)
 
-# dict with cats colors counters init with 0 like {'black': 0, 'white': 0, ...}
-cats_colors_counters = dict.fromkeys(colors, 0)
+    # iter by cats colors and inc corresponding color counter
+    for color in cats_colors:
+        cats_colors_counters[color] += 1
 
-# iter by cats colors and inc corresponding color counter
-for color in cats_colors:
-    inc_color_counter(color)
+    # insert colors info to db
+    cats_colors_info_to_db(cats_colors_counters)
 
-# insert colors info to db
-cats_colors_info_to_db(cats_colors_counters)
+
+if __name__ == '__main__':
+    run()

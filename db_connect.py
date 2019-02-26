@@ -1,7 +1,7 @@
 import psycopg2
 
 
-def db_connect():
+def connect():
     return psycopg2.connect(
         host='localhost',
         port=5432,
