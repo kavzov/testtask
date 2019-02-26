@@ -6,6 +6,14 @@ from urllib.parse import urlparse, parse_qs
 from db_connect import connect
 
 
+def param_in_query(param, query):
+    return query.get(param, None)
+
+
+def multivalued_param(params_list):
+    return len(params_list) > 1
+
+
 class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
     def _set_headers(self):
         self.send_response(200)
@@ -15,7 +23,7 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
     def response(self, content):
         # Send response
         self._set_headers()
-        self.wfile.write(json.dumps(content, indent=2).encode('utf-8'))
+        self.wfile.write(json.dumps(content).encode('utf-8'))
 
     def parse_query(self):
         # Return full query path and GET query params
@@ -78,14 +86,15 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
                                 format(param_name, ', '.join(valid_query_param_names)))
 
         # check valid attributes
-        if query_params.get('attribute', None):
+        if param_in_query('attribute', query_params):
             for attr in query_params['attribute']:
                 if not self.valid_attr(attr, valid_attr_values):
                     messages.append("Error: invalid attribute '{}'. Allowed attributes: {}".
                                     format(attr, ', '.join(valid_attr_values)))
 
         # check valid order
-        if query_params.get('order', None):
+        # if query_params.get('order', None):
+        if param_in_query('order', query_params):
             # 1> order parameters given
             if len(query_params['order']) > 1:
                 messages.append("Error: {} order parameters given. 1 expected".format(len(query_params['order'])))
@@ -97,34 +106,32 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
                                     format(order, ', '.join(valid_order_values)))
 
         # check valid offset
-        if query_params.get('offset', None):
+        if param_in_query('offset', query_params):
             # 1> offset parameters given
-            if len(query_params['offset']) > 1:
-                messages.append("Error: {} offset parameters given. 1 expected".format(len(query_params['offset'])))
+            if multivalued_param(query_params['offset']):
+                messages.append("Error: {} 'offset' parameters given. 1 expected".format(len(query_params['offset'])))
             else:
                 offset = query_params['offset'][0]
                 # offset is not integer
-                if query_params.get('offset', None):
-                    if not offset.isdigit():
-                        messages.append("Error: invalid offset '{}'. Integer number expected.".format(offset))
-                    else:
-                        # offset (single and it int number) >= records in table
-                        cats_number = self.get_dbtable_size('cats')
-                        if int(offset) >= cats_number:
-                            messages.append("Warning: empty set because of given offset {} greater than allowed {}".
-                                            format(offset, cats_number-1))
+                if not offset.isdigit():
+                    messages.append("Error: invalid offset '{}'. Integer expected.".format(offset))
+                else:
+                    # offset (single and it int number) >= records in table
+                    cats_number = self.get_dbtable_size('cats')
+                    if int(offset) >= cats_number:
+                        messages.append("Warning: empty set because of given offset {} greater than allowed {}".
+                                        format(offset, cats_number-1))
 
         # check valid limit
-        # 1> offset parameters given
-        if query_params.get('limit', None):
-            if len(query_params['limit']) > 1:
-                messages.append("Error: {} limit parameters given. 1 expected".format(len(query_params['limit'])))
+        if param_in_query('limit', query_params):
+            # 1> offset parameters given
+            if multivalued_param(query_params['limit']):
+                messages.append("Error: {} 'limit' parameters given. 1 expected".format(len(query_params['limit'])))
             else:
                 limit = query_params['limit'][0]
                 # limit is not integer
-                if query_params.get('limit', None):
-                    if not limit.isdigit():
-                        messages.append("Error: invalid limit '{}'. Integer number expected.".format(limit))
+                if not limit.isdigit():
+                    messages.append("Error: invalid limit '{}'. Integer expected.".format(limit))
 
         if messages:
             self.response(messages)
