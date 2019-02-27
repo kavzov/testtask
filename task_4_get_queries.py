@@ -20,10 +20,10 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json")
         self.end_headers()
 
-    def response(self, content):
+    def response(self, content, indent):
         # Send response
         self._set_headers()
-        self.wfile.write(json.dumps(content).encode('utf-8'))
+        self.wfile.write(json.dumps(content, indent=indent).encode('utf-8'))
 
     def parse_query(self):
         # Return full query path and GET query params
@@ -64,10 +64,12 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         valid_path = '/cats'
-        valid_query_param_names = ['attribute', 'color', 'limit', 'offset', 'order']
+        valid_query_param_names = ['attribute', 'limit', 'offset', 'order', 'indent']
         valid_attr_values = self.get_attr_names()
         valid_order_values = ['asc', 'desc']
         messages = []
+        indent = None
+        DEFAULT_JSON_INDENT = 2
 
         # Get query path and params
         query_path, query_params = self.parse_query()
@@ -93,7 +95,6 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
                                     format(attr, ', '.join(valid_attr_values)))
 
         # check valid order
-        # if query_params.get('order', None):
         if param_in_query('order', query_params):
             # 1> order parameters given
             if len(query_params['order']) > 1:
@@ -112,15 +113,17 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
                 messages.append("Error: {} 'offset' parameters given. 1 expected".format(len(query_params['offset'])))
             else:
                 offset = query_params['offset'][0]
-                # offset is not integer
+                # single offset may be not integer
                 if not offset.isdigit():
                     messages.append("Error: invalid offset '{}'. Integer expected.".format(offset))
                 else:
-                    # offset (single and it int number) >= records in table
+                    # single integer offset may be >= records in table => nothing to output
                     cats_number = self.get_dbtable_size('cats')
                     if int(offset) >= cats_number:
-                        messages.append("Warning: empty set because of given offset {} greater than allowed {}".
-                                        format(offset, cats_number-1))
+                        messages.append(
+                            "Warning: There is no results because given offset {} greater than allowed {}".
+                            format(offset, cats_number-1)
+                        )
 
         # check valid limit
         if param_in_query('limit', query_params):
@@ -133,15 +136,26 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
                 if not limit.isdigit():
                     messages.append("Error: invalid limit '{}'. Integer expected.".format(limit))
 
+        # check valid indent
+        if param_in_query('indent', query_params):
+            # 1> indent parameters given
+            if multivalued_param(query_params['indent']):
+                messages.append("Error: {} 'indent' parameters given. 1 expected".format(len(query_params['indent'])))
+            else:
+                indent = query_params['indent'][0]
+                # indent is not integer
+                if not indent.isdigit():
+                    messages.append("Error: invalid indent '{}'. Integer expected.".format(indent))
+
         if messages:
-            self.response(messages)
+            self.response(messages, DEFAULT_JSON_INDENT)
             return
 
         # all right - do query
         query = 'SELECT * FROM cats'
 
         # attributes in query string
-        if query_params.get('attribute', None):
+        if param_in_query('attribute', query_params):
             query += ' ORDER BY '
             # may be 1>= attrs
             for attr in query_params['attribute']:
@@ -149,19 +163,23 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
             query = query.rstrip(', ')
 
         # order in query string
-        if query_params.get('order', None):
+        if param_in_query('order', query_params):
             order = query_params['order'][0]
             query += ' {}'.format(order.upper())
 
         # offset in query string
-        if query_params.get('offset', None):
+        if param_in_query('offset', query_params):
             offset = query_params['offset'][0]
             query += ' OFFSET {}'.format(offset)
 
         # limit in query string
-        if query_params.get('limit', None):
+        if param_in_query('limit', query_params):
             limit = query_params['limit'][0]
             query += ' LIMIT {}'.format(limit)
+
+        # indent in query string
+        if param_in_query('indent', query_params):
+            indent = int(query_params['indent'][0])
 
         # query
         with connect() as conn:
@@ -172,7 +190,7 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
                     print("Psycopg2 error: ", e)
                 res = cur.fetchall()
 
-        self.response(res)
+        self.response(res, indent)
 
 
 def run():
