@@ -62,6 +62,9 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
     def valid_attr(self, attr, valid_attrs):
         return attr in valid_attrs
 
+    def check_query_errors(self, query_string):
+        pass
+
     def do_GET(self):
         valid_path = '/cats'
         valid_query_param_names = ['attribute', 'limit', 'offset', 'order', 'indent']
