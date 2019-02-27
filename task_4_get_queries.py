@@ -3,7 +3,7 @@ import psycopg2
 import psycopg2.extras
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-from db_connect import connect
+from db_connect import db_query_realdict
 
 
 def param_in_query(param, query):
@@ -20,10 +20,10 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json")
         self.end_headers()
 
-    def response(self, content, indent):
+    def response(self, content):
         # Send response
         self._set_headers()
-        self.wfile.write(json.dumps(content, indent=indent).encode('utf-8'))
+        self.wfile.write(json.dumps(content).encode('utf-8'))
 
     def parse_query(self):
         # Return full query path and GET query params
@@ -62,33 +62,27 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
     def valid_attr(self, attr, valid_attrs):
         return attr in valid_attrs
 
-    def check_query_errors(self, query_string):
-        pass
-
-    def do_GET(self):
+    def check_query_errors(self, query_path, query_params):
+        """
+        Check query parameters for errors
+        Return errors messages list
+        """
         valid_path = '/cats'
-        valid_query_param_names = ['attribute', 'limit', 'offset', 'order', 'indent']
+        valid_query_params = ['attribute', 'limit', 'offset', 'order']
         valid_attr_values = self.get_attr_names()
         valid_order_values = ['asc', 'desc']
         messages = []
-        indent = None
-        DEFAULT_JSON_INDENT = 2
 
-        # Get query path and params
-        query_path, query_params = self.parse_query()
-
-        # CHECK ERRORS
-        # check query path
-        # if it not starts with '/cats'
+        # query path must starts with '/cats'
         if not self.valid_path(query_path, valid_path):
             messages.append("Error: invalid path '{}'. Expected '{}'".
                             format(query_path, valid_path))
 
         # check query param names
-        for param_name in query_params:
-            if not self.valid_param(param_name, valid_query_param_names):
+        for param in query_params:
+            if not self.valid_param(param, valid_query_params):
                 messages.append("Error: invalid query parameter '{}'. Allowed parameters: {}".
-                                format(param_name, ', '.join(valid_query_param_names)))
+                                format(param, ', '.join(valid_query_params)))
 
         # check valid attributes
         if param_in_query('attribute', query_params):
@@ -139,24 +133,11 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
                 if not limit.isdigit():
                     messages.append("Error: invalid limit '{}'. Integer expected.".format(limit))
 
-        # check valid indent
-        if param_in_query('indent', query_params):
-            # 1> indent parameters given
-            if multivalued_param(query_params['indent']):
-                messages.append("Error: {} 'indent' parameters given. 1 expected".format(len(query_params['indent'])))
-            else:
-                indent = query_params['indent'][0]
-                # indent is not integer
-                if not indent.isdigit():
-                    messages.append("Error: invalid indent '{}'. Integer expected.".format(indent))
+        return messages
 
-        if messages:
-            self.response(messages, DEFAULT_JSON_INDENT)
-            return
-
-        # all right - do query
+    def get_sql_query(self, query_params):
+        """ Return sql query string from valid query params """
         query = 'SELECT * FROM cats'
-
         # attributes in query string
         if param_in_query('attribute', query_params):
             query += ' ORDER BY '
@@ -180,20 +161,29 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
             limit = query_params['limit'][0]
             query += ' LIMIT {}'.format(limit)
 
-        # indent in query string
-        if param_in_query('indent', query_params):
-            indent = int(query_params['indent'][0])
+        return query
 
-        # query
-        with connect() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                try:
-                    cur.execute(query)
-                except psycopg2.Error as e:
-                    print("Psycopg2 error: ", e)
-                res = cur.fetchall()
+    def do_GET(self):
+        """ Handles GET query """
+        # get query path and params
+        query_path, query_params = self.parse_query()
 
-        self.response(res, indent)
+        # get errors/warnings messages
+        messages = self.check_query_errors(query_path, query_params)
+
+        # query has errors => send messages to client and stop program
+        if messages:
+            self.response(messages)
+            return
+
+        # all params is ok: get sql query and indent (
+        query = self.get_sql_query(query_params)
+
+        # do query
+        data = db_query_realdict(query)
+
+        # send data to client
+        self.response(data)
 
 
 def run():
