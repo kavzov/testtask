@@ -14,16 +14,10 @@ def multivalued_param(params_list):
     return len(params_list) > 1
 
 
-class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
-    def _set_headers(self):
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-
-    def response(self, content):
-        # Send response
-        self._set_headers()
-        self.wfile.write(json.dumps(content).encode('utf-8'))
+class Checker:
+    """  """
+    def __init__(self, handler):
+        self.path = handler.path
 
     def parse_query(self):
         # Return full query path and GET query params
@@ -135,6 +129,22 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
 
         return messages
 
+
+class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        self.checker = Checker(self)
+        super().__init__(*args, **kwargs)
+
+    def _set_headers(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+
+    def response(self, content):
+        # Send response
+        self._set_headers()
+        self.wfile.write(json.dumps(content).encode('utf-8'))
+
     def set_sql_query(self, query_params):
         """ Return sql query string from valid query params """
         query = 'SELECT * FROM cats'
@@ -166,10 +176,10 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         """ Handles GET query """
         # get query path and params
-        query_path, query_params = self.parse_query()
+        query_path, query_params = self.checker.parse_query()
 
         # get errors/warnings messages
-        messages = self.check_query_errors(query_path, query_params)
+        messages = self.checker.check_query_errors(query_path, query_params)
 
         # query has errors => send messages to client and halt
         if messages:
