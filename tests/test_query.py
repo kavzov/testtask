@@ -5,12 +5,13 @@ from task_4_get_queries import Checker
 class TestTask4(unittest.TestCase):
     def setUp(self):
         self.obj = Checker()
+        self.obj.VALID_ATTR_VALUES = (lambda: ['name', 'color', 'tail_length', 'whiskers_length'])()
 
     def test_path(self):
-        good_path = '/cats'
-        bad_path = '/dogs'
-        self.assertEqual([], self.obj.check_query_errors(good_path, {}))
-        self.assertIn('invalid path', self.obj.check_query_errors(bad_path, {})[0])
+        valid_path = '/cats'
+        invalid_path = '/dogs'
+        self.assertEqual([], self.obj.check_query_errors(valid_path, {}))
+        self.assertIn('invalid path', self.obj.check_query_errors(invalid_path, {})[0])
 
     def test_query_params(self):
         valid_params = {'attribute': []}
@@ -25,11 +26,13 @@ class TestTask4(unittest.TestCase):
         self.assertIn("invalid attribute", self.obj.check_query_errors('/cats', invalid_attrs)[0])
 
     def test_order(self):
-        valid_order = {'order': ['desc']}
-        invalid_order = {'order': ['misc']}
-        invalid_order_multi = {'order': ['desc', 'asc']}
+        valid_order = {'attribute': ['color'], 'order': ['desc']}
+        invalid_order = {'attribute': ['color'], 'order': ['misc']}
+        invalid_order_single = {'order': ['asc']}
+        invalid_order_multi = {'attribute': ['color'], 'order': ['desc', 'asc']}
         self.assertEqual([], self.obj.check_query_errors('/cats', valid_order))
         self.assertIn("invalid order", self.obj.check_query_errors('/cats', invalid_order)[0])
+        self.assertIn("only with sorting parameter", self.obj.check_query_errors('/cats', invalid_order_single)[0])
         self.assertIn("'order' parameters given", self.obj.check_query_errors('/cats', invalid_order_multi)[0])
 
     def test_offset(self):
