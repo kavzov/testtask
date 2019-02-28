@@ -3,7 +3,7 @@ import psycopg2
 import psycopg2.extras
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-from db_connect import connect, db_query_realdict
+from db_connect import connect, db_query_realdict, db_table_size
 
 
 def param_in_query(param, query):
@@ -17,14 +17,16 @@ def multivalued_param(params_list):
 class Checker:
     """ Class checker for query string """
 
-    def parse_query(self, query_string):
+    @staticmethod
+    def parse_query(query_string):
         # Return query path as string and GET query params as dict like {'param_name': ['val1', 'val2']}
         parsed_url = urlparse(query_string)
         query_path = parsed_url.path
         query_params = parse_qs(parsed_url.query)
         return query_path, query_params
 
-    def get_attr_names(self):
+    @staticmethod
+    def get_attr_names():
         with connect() as conn:
             with conn.cursor() as cur:
                 query = 'SELECT * FROM cats'
@@ -33,17 +35,6 @@ class Checker:
                 except psycopg2.Error as e:
                     print("Psycopg2 error: ", e)
         return [desc[0] for desc in cur.description]
-
-    def get_dbtable_size(self, table_name):
-        with connect() as conn:
-            with conn.cursor() as cur:
-                query = 'SELECT COUNT(*) FROM {}'.format(table_name)
-                try:
-                    cur.execute(query)
-                except psycopg2.Error as e:
-                    print("Psycopg2 error: ", e)
-                res = cur.fetchone()
-        return res[0]
 
     def valid_path(self, path, valid_path):
         return path.startswith(valid_path)
@@ -87,7 +78,7 @@ class Checker:
         if param_in_query('order', query_params):
             # 1> order parameters given
             if len(query_params['order']) > 1:
-                messages.append("Error: {} order parameters given. 1 expected".format(len(query_params['order'])))
+                messages.append("Error: {} 'order' parameters given. 1 expected".format(len(query_params['order'])))
             else:
                 order = query_params['order'][0]
                 # order not 'asc' or 'desc'
@@ -107,7 +98,7 @@ class Checker:
                     messages.append("Error: invalid offset '{}'. Integer expected.".format(offset))
                 else:
                     # single integer offset may be >= records in table => nothing to output
-                    cats_number = self.get_dbtable_size('cats')
+                    cats_number = db_table_size('cats')
                     if int(offset) >= cats_number:
                         messages.append(
                             "Warning: There is no results because given offset {} greater than allowed {}".
