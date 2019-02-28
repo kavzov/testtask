@@ -16,6 +16,14 @@ def multivalued_param(params_list):
 
 class Checker:
     """ Class checker for query string """
+
+    def parse_query(self, query_string):
+        # Return query path as string and GET query params as dict like {'param_name': ['val1', 'val2']}
+        parsed_url = urlparse(query_string)
+        query_path = parsed_url.path
+        query_params = parse_qs(parsed_url.query)
+        return query_path, query_params
+
     def get_attr_names(self):
         with connect() as conn:
             with conn.cursor() as cur:
@@ -135,13 +143,6 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
         self._set_headers()
         self.wfile.write(json.dumps(content).encode('utf-8'))
 
-    def parse_query(self):
-        # Return full query path and GET query params
-        parsed_url = urlparse(self.path)
-        query_path = parsed_url.path
-        query_params = parse_qs(parsed_url.query)
-        return query_path, query_params
-
     def set_sql_query(self, query_params):
         """ Return sql query string from valid query params """
         query = 'SELECT * FROM cats'
@@ -173,7 +174,7 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         """ Handles GET query """
         # get query path and params
-        query_path, query_params = self.parse_query()
+        query_path, query_params = self.checker.parse_query(self.path)
 
         # get errors/warnings messages
         messages = self.checker.check_query_errors(query_path, query_params)
