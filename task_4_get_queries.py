@@ -3,7 +3,7 @@ import psycopg2
 import psycopg2.extras
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-from db_connect import db_query_realdict
+from db_connect import connect, db_query_realdict
 
 
 def param_in_query(param, query):
@@ -135,7 +135,7 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
 
         return messages
 
-    def get_sql_query(self, query_params):
+    def set_sql_query(self, query_params):
         """ Return sql query string from valid query params """
         query = 'SELECT * FROM cats'
         # attributes in query string
@@ -171,15 +171,15 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
         # get errors/warnings messages
         messages = self.check_query_errors(query_path, query_params)
 
-        # query has errors => send messages to client and stop program
+        # query has errors => send messages to client and halt
         if messages:
             self.response(messages)
             return
 
-        # all params is ok: get sql query and indent (
-        query = self.get_sql_query(query_params)
+        # set sql query
+        query = self.set_sql_query(query_params)
 
-        # do query
+        # get data from db
         data = db_query_realdict(query)
 
         # send data to client
