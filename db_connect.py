@@ -33,3 +33,14 @@ def db_table_size(table_name):
                 print("Psycopg2 error: ", e)
             res = cur.fetchone()
     return res[0]
+
+
+def db_table_column_names(table_name):
+    with connect() as conn:
+        with conn.cursor() as cur:
+            query = 'SELECT * FROM {}'.format(table_name)
+            try:
+                cur.execute(query)
+            except psycopg2.Error as e:
+                print("Psycopg2 error: ", e)
+    return [desc[0] for desc in cur.description]
