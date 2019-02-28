@@ -15,17 +15,7 @@ def multivalued_param(params_list):
 
 
 class Checker:
-    """  """
-    def __init__(self, handler):
-        self.path = handler.path
-
-    def parse_query(self):
-        # Return full query path and GET query params
-        parsed_url = urlparse(self.path)
-        query_path = parsed_url.path
-        query_params = parse_qs(parsed_url.query)
-        return query_path, query_params
-
+    """ Class checker for query string """
     def get_attr_names(self):
         with connect() as conn:
             with conn.cursor() as cur:
@@ -72,7 +62,7 @@ class Checker:
             messages.append("Error: invalid path '{}'. Expected '{}'".
                             format(query_path, valid_path))
 
-        # check query param names
+        # query params must be from valid_query_params list
         for param in query_params:
             if not self.valid_param(param, valid_query_params):
                 messages.append("Error: invalid query parameter '{}'. Allowed parameters: {}".
@@ -132,7 +122,7 @@ class Checker:
 
 class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        self.checker = Checker(self)
+        self.checker = Checker()
         super().__init__(*args, **kwargs)
 
     def _set_headers(self):
@@ -144,6 +134,13 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
         # Send response
         self._set_headers()
         self.wfile.write(json.dumps(content).encode('utf-8'))
+
+    def parse_query(self):
+        # Return full query path and GET query params
+        parsed_url = urlparse(self.path)
+        query_path = parsed_url.path
+        query_params = parse_qs(parsed_url.query)
+        return query_path, query_params
 
     def set_sql_query(self, query_params):
         """ Return sql query string from valid query params """
@@ -176,7 +173,7 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         """ Handles GET query """
         # get query path and params
-        query_path, query_params = self.checker.parse_query()
+        query_path, query_params = self.parse_query()
 
         # get errors/warnings messages
         messages = self.checker.check_query_errors(query_path, query_params)
