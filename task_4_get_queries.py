@@ -114,12 +114,13 @@ class Checker:
             if not limit.isdigit():
                 self.messages.append("Error: invalid limit '{}'. Integer expected.".format(limit))
 
-    def check_query_errors(self, query_path, query_params):
+    def check_query_errors(self, query_string):
         """
         Check query parameters for errors
         Return errors messages list
         """
         self.messages = []
+        query_path, query_params = self.parse_query(query_string)
 
         # check query path - it must starts with '/cats'
         self._check_path(query_path)
@@ -192,10 +193,10 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         """ Handles GET query """
         # get query path and params
-        query_path, query_params = self.checker.parse_query(self.path)
 
         # get errors/warnings messages
-        messages = self.checker.check_query_errors(query_path, query_params)
+        # messages = self.checker.check_query_errors(query_path, query_params)
+        messages = self.checker.check_query_errors(self.path)
 
         # query has errors => send messages to client and halt
         if messages:
@@ -203,6 +204,7 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
             return
 
         # set sql query
+        query_params = self.checker.parse_query(self.path)[1]
         query = self._set_sql_query(query_params)
 
         # get data from db
