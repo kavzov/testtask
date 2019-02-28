@@ -21,3 +21,15 @@ def db_query_realdict(query):
                 print("Psycopg2 error: ", e)
             res = cur.fetchall()
     return res
+
+
+def db_table_size(table_name):
+    with connect() as conn:
+        with conn.cursor() as cur:
+            query = 'SELECT COUNT(*) FROM {}'.format(table_name)
+            try:
+                cur.execute(query)
+            except psycopg2.Error as e:
+                print("Psycopg2 error: ", e)
+            res = cur.fetchone()
+    return res[0]
