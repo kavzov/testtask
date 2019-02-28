@@ -164,7 +164,7 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _set_sql_query(self, query_params):
         """ Return sql query string from valid query params """
-        query = 'SELECT * FROM cats'
+        query = 'SELECT * FROM {}'.format(self.checker.DB_TABLE)
         # attributes in query string
         if param_in_query('attribute', query_params):
             query += ' ORDER BY '
