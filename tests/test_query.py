@@ -43,7 +43,7 @@ class TestTask4(unittest.TestCase):
         invalid_offset_multi = '/cats?offset=10&offset=20'
         self.assertEqual([], self.obj.check_query(valid_offset, [], self.valid_offset))
         self.assertIn("invalid offset", self.obj.check_query(invalid_offset_sym, [], self.valid_offset)[0])
-        self.assertIn("greater than allowed", self.obj.check_query(invalid_offset_greater, [], self.valid_offset)[0])
+        self.assertIn("greater than the maximum", self.obj.check_query(invalid_offset_greater, [], self.valid_offset)[0])
         self.assertIn("'offset' parameters given", self.obj.check_query(invalid_offset_multi, [], self.valid_offset)[0])
 
     def test_limit(self):
