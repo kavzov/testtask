@@ -4,14 +4,6 @@ from urllib.parse import urlparse, parse_qs
 from db_connect import db_query_realdict, db_table_column_names, db_table_size
 
 
-def param_in_query(param, query):
-    return query.get(param, None)
-
-
-def multivalued_param(params_list):
-    return len(params_list) > 1
-
-
 class Checker:
     """ Class checker for query string """
     def __init__(self):
@@ -30,64 +22,48 @@ class Checker:
         query_params = parse_qs(parsed_url.query)
         return query_path, query_params
 
-    def _valid_path(self, path):
-        """ Return whether path starts with valid string """
-        return path.startswith(self.VALID_PATH)
-
-    def _valid_param(self, param):
-        """ Return whether param in valid query params list """
-        return param in self.VALID_QUERY_PARAMS
-
-    def _valid_attr(self, attr):
-        """ Return whether attribute in valid attributes list """
-        return attr in self.VALID_ATTR_VALUES
-
-    def _valid_order(self, order):
-        """ Return whether order 'asc' or 'desc' """
-        return order in self.VALID_ORDER_VALUES
-
     # --- Check functions add error/warning messages in messages list if errors occurs --- #
     def _check_path(self, path):
         """ Add error message if invalid path """
-        if not self._valid_path(path):
+        if not path.startswith(self.VALID_PATH):
             self.messages.append("Error: invalid path '{}'. Expected '{}'".
                                  format(path, self.VALID_PATH))
 
     def _check_query_params(self, params):
         """ Check every query parameter and add error message for every invalid value """
         for param in params:
-            if not self._valid_param(param):
+            if not (param in self.VALID_QUERY_PARAMS):
                 self.messages.append("Error: invalid query parameter '{}'. Allowed parameters: {}".
                                      format(param, ', '.join(self.VALID_QUERY_PARAMS)))
 
     def _check_attributes(self, attrs):
         """ Check every 'attribute' parameter and add error message for every invalid value """
         for attr in attrs:
-            if not self._valid_attr(attr):
+            if not (attr in self.VALID_ATTR_VALUES):
                 self.messages.append("Error: invalid attribute '{}'. Allowed attributes: {}".
                                      format(attr, ', '.join(self.VALID_ATTR_VALUES)))
 
     def _check_order(self, query_params):
         """ Check 'order' parameter and add error message for every invalid case """
         # 'order' must be only with 'attribute'
-        if not param_in_query('attribute', query_params):
+        if not query_params.get('attribute', None):
             self.messages.append("Error: 'order' parameter must be only with sorting parameter 'attribute'")
         else:
             # 'order' must be only one
-            if multivalued_param(query_params['order']):
+            if len(query_params['order']) > 1:
                 self.messages.append("Error: {} 'order' parameters given. 1 expected".
                                      format(len(query_params['order'])))
             else:
                 # 'order' must have only 'asc' or 'desc' value
                 order = query_params['order'][0]
-                if not self._valid_order(order):
+                if not (order in self.VALID_ORDER_VALUES):
                     self.messages.append("Error: invalid order '{}'. Allowed values: {}.".
                                          format(order, ', '.join(self.VALID_ORDER_VALUES)))
 
     def _check_offset(self, offset_list):
         """ Check 'offset' parameter and add error message for every invalid case """
         # 'offset' must be only one
-        if multivalued_param(offset_list):
+        if len(offset_list) > 1:
             self.messages.append("Error: {} 'offset' parameters given. 1 expected".format(len(offset_list)))
         else:
             offset = offset_list[0]
@@ -106,7 +82,7 @@ class Checker:
     def _check_limit(self, limit_list):
         """ Check 'limit' parameter and add error message for every invalid case """
         # 'limit' must be only one
-        if multivalued_param(limit_list):
+        if len(limit_list) > 1:
             self.messages.append("Error: {} 'limit' parameters given. 1 expected".format(len(limit_list)))
         else:
             limit = limit_list[0]
@@ -114,7 +90,7 @@ class Checker:
             if not limit.isdigit():
                 self.messages.append("Error: invalid limit '{}'. Integer expected.".format(limit))
 
-    def check_query_errors(self, query_string):
+    def check_query(self, query_string):
         """
         Check query parameters for errors
         Return errors messages list
@@ -129,19 +105,19 @@ class Checker:
         self._check_query_params(query_params)
 
         # check parameter 'attribute' - its values must be from VALID_ATTR_VALUES list
-        if param_in_query('attribute', query_params):
+        if query_params.get('attribute'):
             self._check_attributes(query_params['attribute'])
 
         # check valid order
-        if param_in_query('order', query_params):
+        if query_params.get('order'):
             self._check_order(query_params)
 
         # check valid offset
-        if param_in_query('offset', query_params):
+        if query_params.get('offset'):
             self._check_offset(query_params['offset'])
 
         # check valid limit
-        if param_in_query('limit', query_params):
+        if query_params.get('limit'):
             self._check_limit(query_params['limit'])
 
         return self.messages
@@ -166,7 +142,7 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
         """ Return sql query string from valid query params """
         query = 'SELECT * FROM {}'.format(self.checker.DB_TABLE)
         # attributes in query string
-        if param_in_query('attribute', query_params):
+        if query_params.get('attribute'):
             query += ' ORDER BY '
             # may be 1>= attrs
             for attr in query_params['attribute']:
@@ -174,17 +150,17 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
             query = query.rstrip(', ')
 
         # order in query string
-        if param_in_query('order', query_params):
+        if query_params.get('order'):
             order = query_params['order'][0]
             query += ' {}'.format(order.upper())
 
         # offset in query string
-        if param_in_query('offset', query_params):
+        if query_params.get('offset'):
             offset = query_params['offset'][0]
             query += ' OFFSET {}'.format(offset)
 
         # limit in query string
-        if param_in_query('limit', query_params):
+        if query_params.get('limit'):
             limit = query_params['limit'][0]
             query += ' LIMIT {}'.format(limit)
 
@@ -196,7 +172,7 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
 
         # get errors/warnings messages
         # messages = self.checker.check_query_errors(query_path, query_params)
-        messages = self.checker.check_query_errors(self.path)
+        messages = self.checker.check_query(self.path)
 
         # query has errors => send messages to client and halt
         if messages:
