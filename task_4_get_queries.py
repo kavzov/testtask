@@ -6,17 +6,19 @@ from db_connect import db_query_realdict, db_table_column_names, db_table_size
 
 class Checker:
     """ Class checker for query string """
+    VALID_PATH = '/cats'
+    VALID_QUERY_PARAMS = ['attribute', 'limit', 'offset', 'order']
+    VALID_ORDER_VALUES = ['asc', 'desc']
+
     def __init__(self):
-        self.DB_TABLE = 'cats'
-        self.VALID_PATH = '/cats'
-        self.VALID_QUERY_PARAMS = ['attribute', 'limit', 'offset', 'order']
-        self.VALID_ATTR_VALUES = db_table_column_names(self.DB_TABLE)
-        self.VALID_ORDER_VALUES = ['asc', 'desc']
         self.messages = []
 
     @staticmethod
     def parse_query(query_string):
-        # Return query path as string and GET query params as dict like {'param_name': ['val1', 'val2']}
+        """
+        Return string query_path and GET query parameters as dict like
+        {'param_name1': ['val1', 'val2'], 'param_name2': ['val1'], ...}
+        """
         parsed_url = urlparse(query_string)
         query_path = parsed_url.path
         query_params = parse_qs(parsed_url.query)
@@ -36,12 +38,12 @@ class Checker:
                 self.messages.append("Error: invalid query parameter '{}'. Allowed parameters: {}".
                                      format(param, ', '.join(self.VALID_QUERY_PARAMS)))
 
-    def _check_attributes(self, attrs):
+    def _check_attributes(self, attrs, valid_attrs):
         """ Check every 'attribute' parameter and add error message for every invalid value """
         for attr in attrs:
-            if not (attr in self.VALID_ATTR_VALUES):
+            if not (attr in valid_attrs):
                 self.messages.append("Error: invalid attribute '{}'. Allowed attributes: {}".
-                                     format(attr, ', '.join(self.VALID_ATTR_VALUES)))
+                                     format(attr, ', '.join(valid_attrs)))
 
     def _check_order(self, query_params):
         """ Check 'order' parameter and add error message for every invalid case """
@@ -60,7 +62,7 @@ class Checker:
                     self.messages.append("Error: invalid order '{}'. Allowed values: {}.".
                                          format(order, ', '.join(self.VALID_ORDER_VALUES)))
 
-    def _check_offset(self, offset_list):
+    def _check_offset(self, offset_list, cats_number):
         """ Check 'offset' parameter and add error message for every invalid case """
         # 'offset' must be only one
         if len(offset_list) > 1:
@@ -72,7 +74,6 @@ class Checker:
                 self.messages.append("Error: invalid offset '{}'. Integer expected.".format(offset))
             else:
                 # 'offset' must be < records in table otherwise nothing to output
-                cats_number = db_table_size(self.DB_TABLE)
                 if int(offset) >= cats_number:
                     self.messages.append(
                         "Warning: There is no results because given offset {} greater than allowed {}".
@@ -90,7 +91,7 @@ class Checker:
             if not limit.isdigit():
                 self.messages.append("Error: invalid limit '{}'. Integer expected.".format(limit))
 
-    def check_query(self, query_string):
+    def check_query(self, query_string, valid_attrs, cats_number):
         """
         Check query parameters for errors
         Return errors messages list
@@ -98,25 +99,25 @@ class Checker:
         self.messages = []
         query_path, query_params = self.parse_query(query_string)
 
-        # check query path - it must starts with '/cats'
+        # query path starts with '/cats'
         self._check_path(query_path)
 
-        # check query parameters - they must be from VALID_QUERY_PARAMS list
+        # query parameters must be from the valid query parameters list
         self._check_query_params(query_params)
 
-        # check parameter 'attribute' - its values must be from VALID_ATTR_VALUES list
+        # values of parameter 'attribute' must be from the valid attributes values list
         if query_params.get('attribute'):
-            self._check_attributes(query_params['attribute'])
+            self._check_attributes(query_params['attribute'], valid_attrs)
 
-        # check valid order
+        # 'order' must be only with 'attribute' parameter, only one and integer
         if query_params.get('order'):
             self._check_order(query_params)
 
-        # check valid offset
+        # 'offset' must be only one, integer and not greater than records in table
         if query_params.get('offset'):
-            self._check_offset(query_params['offset'])
+            self._check_offset(query_params['offset'], cats_number)
 
-        # check valid limit
+        # 'limit' must be only one and integer
         if query_params.get('limit'):
             self._check_limit(query_params['limit'])
 
@@ -124,6 +125,8 @@ class Checker:
 
 
 class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
+    DB_TABLE = 'cats'
+
     def __init__(self, *args, **kwargs):
         self.checker = Checker()
         super().__init__(*args, **kwargs)
@@ -140,7 +143,7 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _set_sql_query(self, query_params):
         """ Return sql query string from valid query params """
-        query = 'SELECT * FROM {}'.format(self.checker.DB_TABLE)
+        query = 'SELECT * FROM {}'.format(self.DB_TABLE)
         # attributes in query string
         if query_params.get('attribute'):
             query += ' ORDER BY '
@@ -168,11 +171,11 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """ Handles GET query """
-        # get query path and params
+        valid_attr_values = db_table_column_names(self.DB_TABLE)
+        cats_number = db_table_size(self.DB_TABLE)
 
         # get errors/warnings messages
-        # messages = self.checker.check_query_errors(query_path, query_params)
-        messages = self.checker.check_query(self.path)
+        messages = self.checker.check_query(self.path, valid_attr_values, cats_number)
 
         # query has errors => send messages to client and halt
         if messages:
@@ -188,6 +191,11 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
 
         # send data to client
         self.response(data)
+
+    def do_POST(self):
+        """ Handles POST query """
+        print(self.path)
+        pass
 
 
 def run():
