@@ -15,6 +15,7 @@ class TestTask4(unittest.TestCase):
         valid_path = '/cats?attribute=name'
         invalid_path = '/dogs?attribute=name'
         self.assertTrue(self.validate(valid_path))
+        self.assertEqual([], self.obj.messages)
         self.assertFalse(self.validate(invalid_path))
         self.assertIn("invalid path", self.obj.messages[0])
 
@@ -22,6 +23,7 @@ class TestTask4(unittest.TestCase):
         valid_param = '/cats?attribute=name'
         invalid_param = '/cats?case=name'
         self.assertTrue((self.validate(valid_param)))
+        self.assertEqual([], self.obj.messages)
         self.assertFalse((self.validate(invalid_param)))
         self.assertIn("invalid query", self.obj.messages[0])
 
@@ -29,6 +31,7 @@ class TestTask4(unittest.TestCase):
         valid_attrs = '/cats?attribute=name&attribute=color'
         invalid_attrs = '/cats?attribute=weight&attribute=color'
         self.assertTrue((self.validate(valid_attrs)))
+        self.assertEqual([], self.obj.messages)
         self.assertFalse((self.validate(invalid_attrs)))
         self.assertIn("invalid attribute", self.obj.messages[0])
 
@@ -38,6 +41,7 @@ class TestTask4(unittest.TestCase):
         invalid_order_alone = '/cats?order=asc&offset=10'
         invalid_order_multi = '/cats?attribute=color&order=asc&order=desc'
         self.assertTrue((self.validate(valid_order)))
+        self.assertEqual([], self.obj.messages)
         self.assertFalse((self.validate(invalid_order)))
         self.assertIn("invalid order", self.obj.messages[0])
         self.assertFalse((self.validate(invalid_order_alone)))
@@ -51,6 +55,7 @@ class TestTask4(unittest.TestCase):
         invalid_offset_greater = '/cats?offset=500'
         invalid_offset_multi = '/cats?offset=10&offset=20'
         self.assertTrue((self.validate(valid_offset)))
+        self.assertEqual([], self.obj.messages)
         self.assertFalse((self.validate(invalid_offset_sym)))
         self.assertIn("invalid offset", self.obj.messages[0])
         self.assertFalse((self.validate(invalid_offset_greater)))
@@ -63,6 +68,7 @@ class TestTask4(unittest.TestCase):
         invalid_limit_sym = '/cats?limit=twenty'
         invalid_limit_multi = '/cats?limit=20&limit=40'
         self.assertTrue((self.validate(valid_limit)))
+        self.assertEqual([], self.obj.messages)
         self.assertFalse((self.validate(invalid_limit_sym)))
         self.assertIn("invalid limit", self.obj.messages[0])
         self.assertFalse((self.validate(invalid_limit_multi)))
