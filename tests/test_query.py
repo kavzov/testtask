@@ -1,55 +1,38 @@
 import unittest
-from task_4_get_queries import Checker
+from task_4_get_queries import Query
 
 
 class TestTask4(unittest.TestCase):
     def setUp(self):
-        self.obj = Checker()
-        self.valid_attr_names = ['name', 'color', 'tail_length', 'whiskers_length']
-        self.valid_offset = 27
+        self.obj = Query()
 
-    def test_path(self):
-        valid_path = '/cats'
-        invalid_path = '/dogs'
-        self.assertEqual([], self.obj.check_query(valid_path, self.valid_attr_names, 0))
-        self.assertIn('invalid path', self.obj.check_query(invalid_path, self.valid_attr_names, 0)[0])
+    def is_valid(self, query):
+        valid_attr_names = ['name', 'color', 'tail_length', 'whiskers_length']
+        valid_offset = 27
+        return self.obj.is_valid(query, valid_attr_names, valid_offset)
 
-    def test_query_params(self):
-        valid_param = '/cats?attribute=name'
-        invalid_param = '/cats?case=name'
-        self.assertEqual([], self.obj.check_query(valid_param, self.valid_attr_names, 0))
-        self.assertIn('invalid query', self.obj.check_query(invalid_param, self.valid_attr_names, 0)[0])
-
-    def test_attrs(self):
-        valid_attrs = '/cats?attribute=name&attribute=color'
-        invalid_attrs = '/cats?attribute=weight'
-        self.assertEqual([], self.obj.check_query(valid_attrs, self.valid_attr_names, 0))
-        self.assertIn("invalid attribute", self.obj.check_query(invalid_attrs, self.valid_attr_names, 0)[0])
-
-    def test_order(self):
-        valid_order = '/cats?attribute=name&order=desc'
-        invalid_order = '/cats?attribute=color&order=misc'
-        invalid_order_single = '/cats?order=asc'
-        invalid_order_multi = '/cats?attribute=color&order=asc&order=desc'
-        self.assertEqual([], self.obj.check_query(valid_order, self.valid_attr_names, 0))
-        self.assertIn("invalid order", self.obj.check_query(invalid_order, self.valid_attr_names, 0)[0])
-        self.assertIn("only with sorting parameter", self.obj.check_query(invalid_order_single, [], 0)[0])
-        self.assertIn("'order' parameters given", self.obj.check_query(invalid_order_multi, self.valid_attr_names, 0)[0])
-
-    def test_offset(self):
-        valid_offset = '/cats?offset=10'
-        invalid_offset_sym = '/cats?offset=ten'
-        invalid_offset_greater = '/cats?offset=500'
-        invalid_offset_multi = '/cats?offset=10&offset=20'
-        self.assertEqual([], self.obj.check_query(valid_offset, [], self.valid_offset))
-        self.assertIn("invalid offset", self.obj.check_query(invalid_offset_sym, [], self.valid_offset)[0])
-        self.assertIn("greater than the maximum", self.obj.check_query(invalid_offset_greater, [], self.valid_offset)[0])
-        self.assertIn("'offset' parameters given", self.obj.check_query(invalid_offset_multi, [], self.valid_offset)[0])
-
-    def test_limit(self):
-        valid_limit = '/cats?limit=20'
-        invalid_limit = '/cats?limit=twenty'
-        invalid_limit_multi = '/cats?limit=20&limit=40'
-        self.assertEqual([], self.obj.check_query(valid_limit, [], 0))
-        self.assertIn("invalid limit", self.obj.check_query(invalid_limit, [], 0)[0])
-        self.assertIn("'limit' parameters given", self.obj.check_query(invalid_limit_multi, [], 0)[0])
+    def test_query(self):
+        valid_query = '/cats?attribute=name&order=desc&offset=5&limit=10'
+        invalid_query_path = '/dogs?attribute=name&order=desc&offset=5&limit=10'
+        invalid_query_params = '/cats?case=name&order=desc&offset=5&limit=10'
+        invalid_query_attr = '/cats?attribute=weight&order=desc&offset=5&limit=10'
+        invalid_query_order = '/cats?attribute=color&order=misc&offset=5&limit=10'
+        invalid_query_order_alone = '/cats?order=desc&limit=10'
+        invalid_query_order_multi = '/cats?attribute=color&order=asc&order=desc&limit=10'
+        invalid_query_offset_sym = '/cats?attribute=color&order=desc&offset=five&limit=10'
+        invalid_query_offset_greater = '/cats?attribute=color&order=desc&offset=500&limit=10'
+        invalid_query_offset_multi = '/cats?attribute=color&order=desc&&offset=25&offset=500'
+        invalid_query_limit_sym = '/cats?attribute=color&order=desc&offset=5&limit=ten'
+        invalid_query_limit_multi = '/cats?attribute=color&order=desc&offset=5&limit=10&limit=20'
+        self.assertTrue(self.is_valid(valid_query))
+        self.assertFalse(self.is_valid(invalid_query_path))
+        self.assertFalse(self.is_valid(invalid_query_params))
+        self.assertFalse(self.is_valid(invalid_query_attr))
+        self.assertFalse(self.is_valid(invalid_query_order))
+        self.assertFalse(self.is_valid(invalid_query_order_alone))
+        self.assertFalse(self.is_valid(invalid_query_order_multi))
+        self.assertFalse(self.is_valid(invalid_query_offset_sym))
+        self.assertFalse(self.is_valid(invalid_query_offset_greater))
+        self.assertFalse(self.is_valid(invalid_query_offset_multi))
+        self.assertFalse(self.is_valid(invalid_query_limit_sym))
+        self.assertFalse(self.is_valid(invalid_query_limit_multi))
