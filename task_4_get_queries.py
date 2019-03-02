@@ -4,7 +4,7 @@ from urllib.parse import urlparse, parse_qs
 from db_connect import db_query_realdict, db_table_column_names, db_table_size
 
 
-class Checker:
+class Query:
     """ Class checker for query string """
     VALID_PATH = '/cats'
     VALID_QUERY_PARAMS = ['attribute', 'limit', 'offset', 'order']
@@ -25,53 +25,70 @@ class Checker:
         return query_path, query_params
 
     # --- Check functions add error/warning messages in messages list if errors occurs --- #
-    def _check_path(self, path):
+    def _valid_path(self, path):
         """ Add error message if invalid path """
+        is_valid_path = True
         if not path.startswith(self.VALID_PATH):
             self.messages.append("Error: invalid path '{}'. Expected '{}'".
                                  format(path, self.VALID_PATH))
+            is_valid_path = False
+        return is_valid_path
 
-    def _check_query_params(self, params):
+    def _valid_params(self, params):
         """ Check every query parameter and add error message for every invalid value """
+        is_valid_params = True
         for param in params:
             if not (param in self.VALID_QUERY_PARAMS):
                 self.messages.append("Error: invalid query parameter '{}'. Allowed parameters: {}".
                                      format(param, ', '.join(self.VALID_QUERY_PARAMS)))
+                is_valid_params = False
+        return is_valid_params
 
-    def _check_attributes(self, attrs, valid_attrs):
-        """ Check every 'attribute' parameter and add error message for every invalid value """
+    def _valid_attrs(self, attrs, valid_attrs):
+        """ Check every 'attribute' parameter, add error message for every invalid value """
+        is_valid_attrs = True
         for attr in attrs:
             if not (attr in valid_attrs):
                 self.messages.append("Error: invalid attribute '{}'. Allowed attributes: {}".
                                      format(attr, ', '.join(valid_attrs)))
+                is_valid_attrs = False
+        return is_valid_attrs
 
-    def _check_order(self, query_params):
+    def _valid_order(self, query_params):
         """ Check 'order' parameter and add error message for every invalid case """
+        is_valid_order = True
         # 'order' must be only with 'attribute'
-        if not query_params.get('attribute', None):
+        if not query_params.get('attribute'):
             self.messages.append("Error: 'order' parameter must be only with sorting parameter 'attribute'")
+            is_valid_order = False
         else:
             # 'order' must be only one
             if len(query_params['order']) > 1:
                 self.messages.append("Error: {} 'order' parameters given. 1 expected".
                                      format(len(query_params['order'])))
+                is_valid_order = False
             else:
                 # 'order' must have only 'asc' or 'desc' value
                 order = query_params['order'][0]
                 if not (order in self.VALID_ORDER_VALUES):
                     self.messages.append("Error: invalid order '{}'. Allowed values: {}.".
                                          format(order, ', '.join(self.VALID_ORDER_VALUES)))
+                    is_valid_order = False
+        return is_valid_order
 
-    def _check_offset(self, offset_list, cats_number):
+    def _valid_offset(self, offset_list, cats_number):
+        is_valid_offset = True
         """ Check 'offset' parameter and add error message for every invalid case """
         # 'offset' must be only one
         if len(offset_list) > 1:
             self.messages.append("Error: {} 'offset' parameters given. 1 expected".format(len(offset_list)))
+            is_valid_offset = False
         else:
             offset = offset_list[0]
             # 'offset' must be integer
             if not offset.isdigit():
                 self.messages.append("Error: invalid offset '{}'. Integer expected.".format(offset))
+                is_valid_offset = False
             else:
                 # 'offset' must be < records in table otherwise nothing to output
                 if int(offset) >= cats_number:
@@ -79,19 +96,25 @@ class Checker:
                         "Warning: There is no results because offset {} greater than the maximum of {}".
                         format(offset, cats_number - 1)
                     )
+                    is_valid_offset = False
+        return is_valid_offset
 
-    def _check_limit(self, limit_list):
+    def _valid_limit(self, limit_list):
         """ Check 'limit' parameter and add error message for every invalid case """
+        is_valid_limit = True
         # 'limit' must be only one
         if len(limit_list) > 1:
             self.messages.append("Error: {} 'limit' parameters given. 1 expected".format(len(limit_list)))
+            is_valid_limit = False
         else:
             limit = limit_list[0]
             # 'limit' must be integer
             if not limit.isdigit():
                 self.messages.append("Error: invalid limit '{}'. Integer expected.".format(limit))
+                is_valid_limit = False
+        return is_valid_limit
 
-    def check_query(self, query_string, valid_attrs, cats_number):
+    def is_valid(self, query_string, valid_attrs, cats_number):
         """
         Check query parameters for errors
         Return errors messages list
@@ -100,35 +123,36 @@ class Checker:
         query_path, query_params = self.parse_query(query_string)
 
         # query path starts with '/cats'
-        self._check_path(query_path)
+        self._valid_path(query_path)
 
         # query parameters must be from the valid query parameters list
-        self._check_query_params(query_params)
+        self._valid_params(query_params)
 
         # values of parameter 'attribute' must be from the valid attributes values list
         if query_params.get('attribute'):
-            self._check_attributes(query_params['attribute'], valid_attrs)
+            self._valid_attrs(query_params['attribute'], valid_attrs)
 
         # 'order' must be only with 'attribute' parameter, only one and integer
         if query_params.get('order'):
-            self._check_order(query_params)
+            self._valid_order(query_params)
 
         # 'offset' must be only one, integer and not greater than records in table
         if query_params.get('offset'):
-            self._check_offset(query_params['offset'], cats_number)
+            self._valid_offset(query_params['offset'], cats_number)
 
         # 'limit' must be only one and integer
         if query_params.get('limit'):
-            self._check_limit(query_params['limit'])
+            self._valid_limit(query_params['limit'])
 
-        return self.messages
+        if not self.messages:
+            return True
 
 
 class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
     DB_TABLE = 'cats'
 
     def __init__(self, *args, **kwargs):
-        self.checker = Checker()
+        self.query = Query()
         super().__init__(*args, **kwargs)
 
     def _set_headers(self):
@@ -174,23 +198,19 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
         valid_attr_values = db_table_column_names(self.DB_TABLE)
         cats_number = db_table_size(self.DB_TABLE)
 
-        # get errors/warnings messages
-        messages = self.checker.check_query(self.path, valid_attr_values, cats_number)
+        if self.query.is_valid(self.path, valid_attr_values, cats_number):
+            # set sql query
+            query_params = self.query.parse_query(self.path)[1]
+            query = self._set_sql_query(query_params)
 
-        # query has errors => send messages to client and halt
-        if messages:
-            self.response(messages)
+            # get data from db
+            data = db_query_realdict(query)
+
+            # send data to client
+            self.response(data)
+        else:
+            self.response(self.query.messages)
             return
-
-        # set sql query
-        query_params = self.checker.parse_query(self.path)[1]
-        query = self._set_sql_query(query_params)
-
-        # get data from db
-        data = db_query_realdict(query)
-
-        # send data to client
-        self.response(data)
 
     def do_POST(self):
         """ Handles POST query """
