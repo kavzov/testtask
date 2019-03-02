@@ -7,7 +7,7 @@ from db_connect import db_query_realdict, db_table_column_names, db_table_size
 class Query:
     """
     Class for query string.
-    Provides is_valid method for query string validate
+    Provides is_valid method for query string validate.
     """
     VALID_PATH = '/cats'
     VALID_QUERY_PARAMS = ['attribute', 'limit', 'offset', 'order']
@@ -21,7 +21,7 @@ class Query:
         """
         Parses query string.
         Return tuple of string query_path, GET query parameters as dict
-        like {'param_name1': ['val1', 'val2'], 'param_name2': ['val1'], ...}
+        like {'param_name1': ['val1', 'val2'], 'param_name2': ['val1'], ...}.
         """
         parsed_url = urlparse(query_string)
         query_path = parsed_url.path
@@ -30,7 +30,7 @@ class Query:
 
     # --- Check functions add error/warning messages in messages list if errors occurs --- #
     def _valid_path(self, path):
-        """ Add error message if invalid path """
+        """ Validate query path and add error message if it invalid """
         is_valid_path = True
         if not path.startswith(self.VALID_PATH):
             self.messages.append("Error: invalid path '{}'. Expected '{}'".
@@ -39,7 +39,7 @@ class Query:
         return is_valid_path
 
     def _valid_params(self, params):
-        """ Check every query parameter and add error message for every invalid value """
+        """ Validate every query parameter and add error message for every invalid value """
         is_valid_params = True
         for param in params:
             if not (param in self.VALID_QUERY_PARAMS):
@@ -49,7 +49,7 @@ class Query:
         return is_valid_params
 
     def _valid_attrs(self, attrs, valid_attrs):
-        """ Check every 'attribute' parameter, add error message for every invalid value """
+        """ Validate every 'attribute' value and add error message for every invalid value """
         is_valid_attrs = True
         for attr in attrs:
             if not (attr in valid_attrs):
@@ -59,7 +59,7 @@ class Query:
         return is_valid_attrs
 
     def _valid_order(self, query_params):
-        """ Check 'order' parameter and add error message for every invalid case """
+        """ Validate 'order' value and add error message for every invalid case """
         is_valid_order = True
         # 'order' must be only with 'attribute'
         if not query_params.get('attribute'):
@@ -81,8 +81,8 @@ class Query:
         return is_valid_order
 
     def _valid_offset(self, offset_list, cats_number):
+        """ Check 'offset' value and add error message for every invalid case """
         is_valid_offset = True
-        """ Check 'offset' parameter and add error message for every invalid case """
         # 'offset' must be only one
         if len(offset_list) > 1:
             self.messages.append("Error: {} 'offset' parameters given. 1 expected".format(len(offset_list)))
@@ -104,7 +104,7 @@ class Query:
         return is_valid_offset
 
     def _valid_limit(self, limit_list):
-        """ Check 'limit' parameter and add error message for every invalid case """
+        """ Check 'limit' value and add error message for every invalid case """
         is_valid_limit = True
         # 'limit' must be only one
         if len(limit_list) > 1:
@@ -120,7 +120,7 @@ class Query:
 
     def is_valid(self, query_string, valid_attrs, cats_number):
         """
-        Validate query parameters
+        Validate all query parameters
         """
         self.messages = []
         query_path, query_params = self.parse_query(query_string)
