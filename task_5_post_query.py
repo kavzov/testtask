@@ -110,8 +110,7 @@ class PostQuery:
 
 
 class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
-    DB_TABLE = 'cats'
-
+    """ HTTP Request handler """
     def __init__(self, *args, **kwargs):
         self.query = PostQuery()
         super().__init__(*args, **kwargs)
@@ -126,12 +125,11 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
         self._set_headers()
         self.wfile.write(json.dumps(content).encode('utf-8'))
 
-    # ----------------------------- #
-    # POST request handle
+    # ---- POST request handle ---- #
 
     def do_POST(self):
         """ Handles POST request """
-        valid_attr_values = db_table_column_names(self.DB_TABLE)
+        valid_attr_values = db_table_column_names(DB_TABLE)
         valid_colors = get_colors()
 
         # get POST query
@@ -141,7 +139,7 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
         # if query is valid - store data to db and send success message to client
         if self.query.is_valid(valid_attr_values, valid_colors):
             # Store cat info to db
-            dict_to_db(self.DB_TABLE, self.query.post_data) and \
+            dict_to_db(DB_TABLE, self.query.post_data) and \
                 self.response("Cat {} stored to database.\n".format(self.query.post_data['name']))
         else:
             # if errors occurred in the query send error message
