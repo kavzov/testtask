@@ -215,11 +215,6 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
             self.response(self.query.messages)
             return
 
-    def do_POST(self):
-        """ Handles POST query """
-        print(self.path)
-        pass
-
 
 def run():
     server_address = ('', 8080)
