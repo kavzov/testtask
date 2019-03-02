@@ -16,21 +16,21 @@ class TestTask4(unittest.TestCase):
         invalid_path = '/dogs?attribute=name'
         self.assertTrue(self.validate(valid_path))
         self.assertFalse(self.validate(invalid_path))
-        self.assertIn('invalid path', self.obj.messages[0])
+        self.assertIn("invalid path", self.obj.messages[0])
 
     def test_query_params(self):
         valid_param = '/cats?attribute=name'
         invalid_param = '/cats?case=name'
         self.assertTrue((self.validate(valid_param)))
         self.assertFalse((self.validate(invalid_param)))
-        self.assertIn('invalid query', self.obj.messages[0])
+        self.assertIn("invalid query", self.obj.messages[0])
 
     def test_attrs(self):
         valid_attrs = '/cats?attribute=name&attribute=color'
         invalid_attrs = '/cats?attribute=weight&attribute=color'
         self.assertTrue((self.validate(valid_attrs)))
         self.assertFalse((self.validate(invalid_attrs)))
-        self.assertIn('invalid attribute', self.obj.messages[0])
+        self.assertIn("invalid attribute", self.obj.messages[0])
 
     def test_order(self):
         valid_order = '/cats?attribute=name&order=desc'

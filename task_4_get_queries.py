@@ -5,7 +5,10 @@ from db_connect import db_query_realdict, db_table_column_names, db_table_size
 
 
 class Query:
-    """ Class checker for query string """
+    """
+    Class for query string.
+    Provides is_valid method for query string validate
+    """
     VALID_PATH = '/cats'
     VALID_QUERY_PARAMS = ['attribute', 'limit', 'offset', 'order']
     VALID_ORDER_VALUES = ['asc', 'desc']
@@ -16,8 +19,9 @@ class Query:
     @staticmethod
     def parse_query(query_string):
         """
-        Return string query_path and GET query parameters as dict like
-        {'param_name1': ['val1', 'val2'], 'param_name2': ['val1'], ...}
+        Parses query string.
+        Return tuple of string query_path, GET query parameters as dict
+        like {'param_name1': ['val1', 'val2'], 'param_name2': ['val1'], ...}
         """
         parsed_url = urlparse(query_string)
         query_path = parsed_url.path
@@ -116,8 +120,7 @@ class Query:
 
     def is_valid(self, query_string, valid_attrs, cats_number):
         """
-        Check query parameters for errors
-        Return errors messages list
+        Validate query parameters
         """
         self.messages = []
         query_path, query_params = self.parse_query(query_string)
