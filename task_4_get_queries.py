@@ -76,7 +76,7 @@ class Checker:
                 # 'offset' must be < records in table otherwise nothing to output
                 if int(offset) >= cats_number:
                     self.messages.append(
-                        "Warning: There is no results because given offset {} greater than allowed {}".
+                        "Warning: There is no results because offset {} greater than the maximum of {}".
                         format(offset, cats_number - 1)
                     )
 
@@ -124,7 +124,7 @@ class Checker:
         return self.messages
 
 
-class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
+class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
     DB_TABLE = 'cats'
 
     def __init__(self, *args, **kwargs):
@@ -200,7 +200,7 @@ class TestTaskHTTPRequestHandler(BaseHTTPRequestHandler):
 
 def run():
     server_address = ('', 8080)
-    httpd = HTTPServer(server_address, TestTaskHTTPRequestHandler)
+    httpd = HTTPServer(server_address, WGTestHTTPRequestHandler)
     httpd.serve_forever()
 
 
