@@ -48,3 +48,23 @@ def db_table_column_names(table_name):
             except psycopg2.Error as e:
                 print("Psycopg2 error: ", e)
     return [desc[0] for desc in cur.description]
+
+
+def dict_to_db(table, data):
+    """ Insert query data (as dict) into db """
+    columns = ', '.join("%({})s".format(key) for key in data.keys())
+    query = 'INSERT INTO {} VALUES ({})'.format(table, columns)
+
+    # convert possible integer values to string
+    data = dict((key, str(val)) for key, val in data.items())
+
+    with connect() as conn:
+        with conn.cursor() as cur:
+            try:
+                cur.execute(query, data)
+            except psycopg2.Error as e:
+                print("Psycopg2 error: ", e)
+                return False
+            else:
+                conn.commit()
+                return True
