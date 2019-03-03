@@ -43,9 +43,9 @@ class PostQuery:
     def _check_length(post_data, items):
         """ Check tail and whiskers length. They must be positive integer """
         for item in items:
-            length = post_data['{}_length'.format(item)]
+            length = post_data[item]
             if length <= 0:
-                return 'Error: {} length is not positive integer'.format(item)
+                return 'Error: {} is not positive integer'.format(item)
 
     @staticmethod
     def _name_correct(name):
@@ -53,35 +53,39 @@ class PostQuery:
         return re.match("""^[a-zA-z][a-zA-Z0-9 _-]*$""", name)
 
     def validate(self, post_data, valid_attrs, valid_colors):
+        res = {'dict': {}, 'error': ''}
         # validate json
         json_error, post_data_dict = self._validate_json(post_data)
         if json_error:
-            return {'error': json_error}
+            res['error'] = json_error
+            return res
 
         # validate attributes: all required
         attrs_error = self._validate_attrs(post_data_dict, valid_attrs)
         if attrs_error:
-            return {'error': attrs_error}
+            res['error'] = attrs_error
+            return res
 
         # validate name
         if not re.match('^[a-zA-Z][a-zA-Z0-9 -]*$', post_data_dict['name']):
-            return {
-                'error':
-                    "Error: invalid name. Expected nonempty string contained letters, digits, space and dash symbols"
-            }
+            res['error'] = "Error: invalid name." \
+                           "Expected nonempty string contained letters, digits, space and dash symbols"
+            return res
 
         # validate color
         if post_data_dict['color'] not in valid_colors:
-            return {'error': "Error: invalid color. Expected exactly these: {}".
-                    format(', '.join("'{}'".format(clr) for clr in valid_colors))
-                    }
+            res['error'] = "Error: invalid color. Expected exactly these: {}".\
+                format(', '.join("'{}'".format(clr) for clr in valid_colors))
+            return res
 
         # validate tail and whiskers type
         for length in ['tail_length', 'whiskers_length']:
             if not isinstance(post_data_dict[length], int):
-                return {'error': "Error: {} not a number".format(length)}
+                res['error'] = "Error: {} not a number".format(length)
+                return res
 
-        return {'dict': post_data_dict}
+        res['dict'] = post_data_dict
+        return res
 
     def check(self, post_data_dict, is_namesake):
         """
@@ -90,7 +94,7 @@ class PostQuery:
         if is_namesake:
             return 'Error: cat {} already exists'. format(post_data_dict['name'])
 
-        length_error = self._check_length(post_data_dict, ['tail', 'whiskers'])
+        length_error = self._check_length(post_data_dict, ['tail_length', 'whiskers_length'])
         if length_error:
             return length_error
 
