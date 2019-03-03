@@ -13,10 +13,6 @@ class PostQuery:
     Class for handle POST query.
     Provides methods for checking POST query .
     """
-    VALID_PATH = '/cat'
-    VALID_QUERY_PARAMS = ['attribute', 'limit', 'offset', 'order']
-    VALID_ORDER_VALUES = ['asc', 'desc']
-
     @staticmethod
     def _validate_json(post_data):
         """ Check string for valid JSON. Return error message if it not valid """
@@ -106,14 +102,8 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
         self.query = PostQuery()
         super().__init__(*args, **kwargs)
 
-    def _set_headers(self):
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-
     def response(self, content):
-        # Send response
-        self._set_headers()
+        """ Send response to client """
         self.wfile.write(json.dumps(content).encode('utf-8'))
 
     # ---- POST request handle ---- #
@@ -135,17 +125,22 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """ Handles POST request """
+        VALID_PATH = '/cat'
+
+        if self.path != VALID_PATH:
+            self.response("Wrong path '{}'. Expected '{}'".format(self.path, VALID_PATH))
+            return
 
         # get POST query
         data_length = int(self.headers['Content-Length'])
         post_data_json = self.rfile.read(data_length).decode('utf-8')
 
-        validation = self.query.validate(post_data_json, self._get_valid_attrs(), self._get_valid_colors())
-        if validation.get('error'):
-            self.response(validation['error'])
+        validation_res = self.query.validate(post_data_json, self._get_valid_attrs(), self._get_valid_colors())
+        if validation_res.get('error'):
+            self.response(validation_res['error'])
             return
 
-        post_data_dict = validation['dict']
+        post_data_dict = validation_res['dict']
 
         # if query is valid - check remaining values
         errors = self.query.check(post_data_dict, self._exist_namesake(post_data_dict['name']))
