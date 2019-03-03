@@ -53,6 +53,7 @@ class PostQuery:
         return re.match("""^[a-zA-z][a-zA-Z0-9 _-]*$""", name)
 
     def validate(self, post_data, valid_attrs, valid_colors):
+        """ Validates POST query parameters """
         res = {'dict': {}, 'error': ''}
         # validate json
         json_error, post_data_dict = self._validate_json(post_data)
@@ -119,10 +120,12 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
 
     @staticmethod
     def _get_valid_attrs():
+        """ Return allowed attributes list """
         return db_table_column_names(DB_TABLE)
 
     @staticmethod
     def _get_valid_colors():
+        """ Return allowed colors list """
         return get_colors()
 
     @staticmethod
@@ -150,8 +153,8 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
         if errors:
             self.response(errors)
         else:
-            # dict_to_db(DB_TABLE, post_data_dict) and \
-            self.response("Success: cat {} stored to database".format(post_data_dict['name']))
+            dict_to_db(DB_TABLE, post_data_dict) and \
+                self.response("Success: cat {} stored to database".format(post_data_dict['name']))
 
 
 def run():
