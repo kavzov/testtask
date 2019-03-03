@@ -1,6 +1,6 @@
 import psycopg2
 import psycopg2.extras
-from db_connect import connect
+from db import connect
 
 
 def get_colors():

@@ -2,7 +2,7 @@ import psycopg2
 import psycopg2.extras
 import statistics
 from collections import Counter
-from db_connect import connect
+from db import connect
 
 
 def get_tail_and_whiskers_lengths():

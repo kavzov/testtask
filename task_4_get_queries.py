@@ -1,7 +1,7 @@
 import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-from db_connect import db_query_realdict, db_table_column_names, db_table_size
+from db import db_query_realdict, db_table_column_names, db_table_size
 
 
 class Query:

@@ -1,5 +1,5 @@
 import psycopg2
-from db_connect import connect
+from db import connect
 
 
 def reset_cat_color_info():

@@ -13,7 +13,18 @@ def connect():
     )
 
 
-def db_query_realdict(query):
+def db_query(query, many=True):
+    """ Query results """
+    with connect() as conn:
+        with conn.cursor() as cur:
+            try:
+                cur.execute(query)
+            except psycopg2.Error as e:
+                print("Psycopg2 error: ", e)
+            return cur.fetchall() if many else cur.fetchone()
+
+
+def db_query_realdict(query, many=True):
     """ Query results as dict: {'key': ['val1', 'val2',...], ...} """
     with connect() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -21,8 +32,7 @@ def db_query_realdict(query):
                 cur.execute(query)
             except psycopg2.Error as e:
                 print("Psycopg2 error: ", e)
-            res = cur.fetchall()
-    return res
+            return cur.fetchall() if many else cur.fetchone()
 
 
 def db_table_size(table_name):
