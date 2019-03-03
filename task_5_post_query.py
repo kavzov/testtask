@@ -1,3 +1,4 @@
+import re
 import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from db_connect import db_query_realdict, db_table_column_names, dict_to_db
@@ -7,106 +8,91 @@ from cats_colors_info import get_colors
 DB_TABLE = 'cats'
 
 
-class NotPositiveIntegerError(Exception):
-    pass
-
-
 class PostQuery:
     """
     Class for handle POST query.
-    Provides is_valid method for POST query string.
+    Provides methods for checking POST query .
     """
     VALID_PATH = '/cats'
     VALID_QUERY_PARAMS = ['attribute', 'limit', 'offset', 'order']
     VALID_ORDER_VALUES = ['asc', 'desc']
 
-    def __init__(self):
-        self.messages = []
-        self.post_data = {}
-
-    def _exist_namesake(self):
-        """ Return QueryDict with the same name cat """
-        namesake = db_query_realdict("SELECT * FROM {} WHERE name='{}'".format(DB_TABLE, self.post_data['name']))
-        if namesake:
-            return True
-
-    def _valid_json(self):
-        """ Validates string for JSON view. Return python dict if valid JSON, None otherwise """
+    @staticmethod
+    def _validate_json(post_data):
+        """ Check string for valid JSON. Return error message if it not valid """
+        json_error = ''
+        post_data_dict = {}
         try:
-            self.post_data = json.loads(self.post_data)
-            return True
+            post_data_dict = json.loads(post_data)
         except json.JSONDecodeError:
-            self.messages.append('Error: invalid JSON')
+            json_error = 'Error: invalid JSON'
+        return json_error, post_data_dict
 
-    def _valid_attrs(self, valid_attrs):
-        """ Validates attrs by comparing with valid attrs list """
-        attrs = sorted(list(self.post_data))
+    @staticmethod
+    def _validate_attrs(post_data, valid_attrs):
+        """ Check attributes by comparing with the valid attributes list """
+        # sort for correct compare
         valid_attrs = sorted(valid_attrs)
-        if not attrs == valid_attrs:
-            self.messages.append('Error: invalid attributes')
-            return False
-        else:
-            return True
+        user_attrs = sorted(list(post_data))
 
-    def _valid_color(self, colors):
-        """ Validates color. It must be one of valid colors list """
-        if self.post_data['color'] not in colors:
-            self.messages.append('Error: invalid color')
-            return False
-        else:
-            return True
+        if not user_attrs == valid_attrs:
+            return 'Error: invalid attributes. Expected exactly these: {}'.\
+                format(', '.join("'{}'".format(attr) for attr in valid_attrs))
 
-    def _valid_length(self, items):
-        is_valid_length = True
+    @staticmethod
+    def _check_length(post_data, items):
+        """ Check tail and whiskers length. They must be positive integer """
         for item in items:
-            length = self.post_data['{}_length'.format(item)]
-            try:
-                length = int(length)
-                if length <= 0:
-                    raise NotPositiveIntegerError
-            except (ValueError, NotPositiveIntegerError):
-                self.messages.append('Error: {} length is not positive integer'.format(item))
-                is_valid_length = False
-        return is_valid_length
+            length = post_data['{}_length'.format(item)]
+            if length <= 0:
+                return 'Error: {} length is not positive integer'.format(item)
 
-    def _valid_name(self):
-        cat_name = self.post_data['name']
-        if not isinstance(cat_name, str):
-            self.messages.append('Error: cat name not a string')
-            return False
+    @staticmethod
+    def _name_correct(name):
+        """ Name must contain at least one letter, digits, space, '_' or '-' symbols """
+        return re.match("""^[a-zA-z][a-zA-Z0-9 _-]*$""", name)
 
-        if cat_name == '':
-            self.messages.append('Error: empty name')
-            return False
+    def validate(self, post_data, valid_attrs, valid_colors):
+        # validate json
+        json_error, post_data_dict = self._validate_json(post_data)
+        if json_error:
+            return {'error': json_error}
 
-        if self._exist_namesake():
-            self.messages.append('Error: cat {} already exists'. format(cat_name))
-            return False
+        # validate attributes: all required
+        attrs_error = self._validate_attrs(post_data_dict, valid_attrs)
+        if attrs_error:
+            return {'error': attrs_error}
 
-        return True
+        # validate name
+        if not re.match('^[a-zA-Z][a-zA-Z0-9 -]*$', post_data_dict['name']):
+            return {
+                'error':
+                    "Error: invalid name. Expected nonempty string contained letters, digits, space and dash symbols"
+            }
 
-    def is_valid(self, valid_attrs, valid_colors):
+        # validate color
+        if post_data_dict['color'] not in valid_colors:
+            return {'error': "Error: invalid color. Expected exactly these: {}".
+                    format(', '.join("'{}'".format(clr) for clr in valid_colors))
+                    }
+
+        # validate tail and whiskers type
+        for length in ['tail_length', 'whiskers_length']:
+            if not isinstance(post_data_dict[length], int):
+                return {'error': "Error: {} not a number".format(length)}
+
+        return {'dict': post_data_dict}
+
+    def check(self, post_data_dict, is_namesake):
         """
-        Validates POST query
+        Check parameters values of POST query
         """
-        self.messages = []
+        if is_namesake:
+            return 'Error: cat {} already exists'. format(post_data_dict['name'])
 
-        if not self._valid_json():
-            return False
-
-        if not self._valid_attrs(valid_attrs):
-            return False
-
-        if not self._valid_color(valid_colors):
-            return False
-
-        if not self._valid_length(['tail', 'whiskers']):
-            return False
-
-        if not self._valid_name():
-            return False
-
-        return True
+        length_error = self._check_length(post_data_dict, ['tail', 'whiskers'])
+        if length_error:
+            return length_error
 
 
 class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -127,24 +113,48 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
 
     # ---- POST request handle ---- #
 
+    @staticmethod
+    def _json_to_dict(data):
+        return json.loads(data)
+
+    @staticmethod
+    def _get_valid_attrs():
+        return db_table_column_names(DB_TABLE)
+
+    @staticmethod
+    def _get_valid_colors():
+        return get_colors()
+
+    @staticmethod
+    def _exist_namesake(name):
+        """ Return QueryDict with the same name cat """
+        # TODO SELECT COUNT not realdict
+        namesake = db_query_realdict("SELECT name FROM {} WHERE name='{}'".format(DB_TABLE, name))
+        if namesake:
+            return True
+
     def do_POST(self):
         """ Handles POST request """
-        valid_attr_values = db_table_column_names(DB_TABLE)
-        valid_colors = get_colors()
 
         # get POST query
         data_length = int(self.headers['Content-Length'])
-        self.query.post_data = self.rfile.read(data_length).decode('utf-8')
+        post_data_json = self.rfile.read(data_length).decode('utf-8')
 
-        # if query is valid - store data to db and send success message to client
-        if self.query.is_valid(valid_attr_values, valid_colors):
-            # Store cat info to db
-            dict_to_db(DB_TABLE, self.query.post_data) and \
-                self.response("Cat {} stored to database.\n".format(self.query.post_data['name']))
-        else:
-            # if errors occurred in the query send error message
-            self.response(self.query.messages)
+        validation = self.query.validate(post_data_json, self._get_valid_attrs(), self._get_valid_colors())
+        if validation.get('error'):
+            self.response(validation['error'])
             return
+
+        post_data_dict = validation['dict']
+
+        # if query is valid - check remaining values
+        errors = self.query.check(post_data_dict, self._exist_namesake(post_data_dict['name']))
+
+        if errors:
+            self.response(errors)
+        else:
+            # dict_to_db(DB_TABLE, post_data_dict) and \
+            self.response("Success: cat {} stored to database".format(post_data_dict['name']))
 
 
 def run():
