@@ -1,7 +1,7 @@
 import re
 import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from db_connect import db_query_realdict, db_table_column_names, dict_to_db
+from db import db_query, db_table_column_names, dict_to_db
 from cats_colors_info import get_colors
 
 
@@ -13,7 +13,7 @@ class PostQuery:
     Class for handle POST query.
     Provides methods for checking POST query .
     """
-    VALID_PATH = '/cats'
+    VALID_PATH = '/cat'
     VALID_QUERY_PARAMS = ['attribute', 'limit', 'offset', 'order']
     VALID_ORDER_VALUES = ['asc', 'desc']
 
@@ -114,10 +114,6 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
     # ---- POST request handle ---- #
 
     @staticmethod
-    def _json_to_dict(data):
-        return json.loads(data)
-
-    @staticmethod
     def _get_valid_attrs():
         return db_table_column_names(DB_TABLE)
 
@@ -128,10 +124,7 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
     @staticmethod
     def _exist_namesake(name):
         """ Return QueryDict with the same name cat """
-        # TODO SELECT COUNT not realdict
-        namesake = db_query_realdict("SELECT name FROM {} WHERE name='{}'".format(DB_TABLE, name))
-        if namesake:
-            return True
+        return db_query("SELECT name FROM {} WHERE name='{}'".format(DB_TABLE, name), many=False)
 
     def do_POST(self):
         """ Handles POST request """
