@@ -80,10 +80,12 @@ def db_table_column_names(table_name):
 
 
 def dict_to_db(table, data):
+    # column names
     columns = "({})".format(', '.join(data.keys()))
-    chcells = "({})".format(', '.join(['%s']*len(data)))
+    # character cells (%s, %s, %s, ...)
+    ch_cells = "({})".format(', '.join(['%s']*len(data)))
     values = tuple(data.values())
-    query = "INSERT INTO {} {} VALUES {}".format(table, columns, chcells)
+    query = "INSERT INTO {} {} VALUES {}".format(table, columns, ch_cells)
     with db_connect() as conn:
         with conn.cursor() as cur:
             try:
@@ -93,3 +95,15 @@ def dict_to_db(table, data):
             else:
                 conn.commit()
                 return True
+
+
+def dict_items_to_db(table, columns, data):
+    """ Insert cats colors stat info to db """
+    columns = "({})".format(', '.join(columns))
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            query = 'INSERT INTO {} {} VALUES %s'.format(table, columns)
+            try:
+                psycopg2.extras.execute_values(cur, query, data.items())
+            except psycopg2.Error as e:
+                print("Psycopg2 error: ", e)
