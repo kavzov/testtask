@@ -1,11 +1,11 @@
 import psycopg2
 import psycopg2.extras
-from db import connect
+from utils import db_connect
 
 
 def get_colors():
     """ Extract available cats colors from 'cat_color_info' type of db and return them as list """
-    with connect() as conn:
+    with db_connect() as conn:
         with conn.cursor() as cur:
             query = 'SELECT unnest(enum_range(NULL::cat_color))'
             try:
@@ -20,7 +20,7 @@ def get_colors():
 
 def get_cats_colors():
     """ Get all cats colors and return them as list """
-    with connect() as conn:
+    with db_connect() as conn:
         with conn.cursor() as cur:
             query = 'SELECT color FROM cats'
             try:
@@ -35,7 +35,7 @@ def get_cats_colors():
 
 def cats_colors_info_to_db(counters):
     """ Insert cats colors stat info to db """
-    with connect() as conn:
+    with db_connect() as conn:
         with conn.cursor() as cur:
             query = 'INSERT INTO cat_colors_info (color, count) VALUES %s'
             try:

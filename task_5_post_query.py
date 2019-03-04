@@ -1,11 +1,12 @@
 import re
 import json
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from db import db_query, db_table_column_names, dict_to_db
+from http.server import BaseHTTPRequestHandler
+from utils import db_query, db_table_column_names, dict_to_db, run_server
+from settings import DB_TABLE_NAME
 from cats_colors_info import get_colors
 
 
-class PostQuery:
+class POSTQuery:
     """
     Class for handle POST query.
     Provides methods for checking POST query .
@@ -78,13 +79,11 @@ class PostQuery:
             return 'Error: cat {} already exists'. format(namesake[0])
 
 
-class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
+class Task5RequestHandler(BaseHTTPRequestHandler):
     """ HTTP Request handler """
     def __init__(self, *args, **kwargs):
-        self.query = PostQuery()
+        self.query = POSTQuery()
         super().__init__(*args, **kwargs)
-
-    DB_TABLE = 'cats'
 
     def response(self, content):
         """ Send response to client """
@@ -92,7 +91,7 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _get_valid_attrs(self):
         """ Return allowed attributes list """
-        return db_table_column_names(self.DB_TABLE)
+        return db_table_column_names(DB_TABLE_NAME)
 
     def _get_valid_colors(self):
         """ Return allowed colors list """
@@ -100,7 +99,7 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _namesake(self, name):
         """ Check whether cat with the same name already exist in db """
-        return db_query("SELECT name FROM {} WHERE name='{}'".format(self.DB_TABLE, name), many=False)
+        return db_query("SELECT name FROM {} WHERE name='{}'".format(DB_TABLE_NAME, name), many=False)
 
     def do_POST(self):
         """ Handles POST request """
@@ -128,15 +127,13 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
             return
 
         # all right - store cat info to db and send success info to client
-        dict_to_db(self.DB_TABLE, post_data_dict) and \
+        if dict_to_db(DB_TABLE_NAME, post_data_dict):
             self.response("Success: cat {} stored to database".format(post_data_dict['name']))
 
 
-def run():
-    server_address = ('', 8080)
-    httpd = HTTPServer(server_address, WGTestHTTPRequestHandler)
-    httpd.serve_forever()
+def main():
+    run_server(handler=Task5RequestHandler)
 
 
 if __name__ == '__main__':
-    run()
+    main()

@@ -1,15 +1,15 @@
 import unittest
-from task_4_get_queries import Query
+from task_4_get_queries import GETQuery
+from settings import VALID_ATTR_NAMES
 
 
-class TestTask4(unittest.TestCase):
+class TestGetQuery(unittest.TestCase):
     def setUp(self):
-        self.obj = Query()
+        self.obj = GETQuery()
 
     def check(self, query):
-        valid_attr_names = ['name', 'color', 'tail_length', 'whiskers_length']
-        valid_offset = 27
-        return self.obj.check(query, valid_attr_names, valid_offset)
+        VALID_OFFSET = 27
+        return self.obj.check(query, VALID_ATTR_NAMES, VALID_OFFSET)
 
     def test_path(self):
         valid_path = '/cats?attribute=name'

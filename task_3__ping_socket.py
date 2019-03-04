@@ -2,12 +2,12 @@ import socket
 
 
 def run():
-    valid_path = '/ping'
+    VALID_PATH = '/ping'
 
     # Socket settings
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(('', 8080))
-    server_socket.listen()
+    server_socket.listen(1)
 
     while True:
         response_msg = 'Cats service. Version 0.1\n'
@@ -23,7 +23,7 @@ def run():
             path = None
 
         # if path is not '/ping' set empty response message
-        if path != valid_path:
+        if path != VALID_PATH:
             response_msg = '\n'
 
         # Send message to client

@@ -1,32 +1,17 @@
 import json
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
-from db import db_query_realdict, db_table_column_names, db_table_size
+from http.server import BaseHTTPRequestHandler
+from utils import db_query_realdict, db_table_column_names, db_table_size, parse_query, run_server
+from settings import DB_TABLE_NAME
 
 
-class Query:
+class GETQuery:
     """
     Class for query string.
-    Provides is_valid method for query string validate.
+    Provides the method for query string checking.
     """
     VALID_PATH = '/cats'
     VALID_QUERY_PARAMS = ['attribute', 'limit', 'offset', 'order']
     VALID_ORDER_VALUES = ['asc', 'desc']
-
-    def __init__(self):
-        self.messages = []
-
-    @staticmethod
-    def parse_query(query_string):
-        """
-        Parses query string.
-        Return tuple of string query_path, GET query parameters as dict
-        like {'param_name1': ['val1', 'val2'], 'param_name2': ['val1'], ...}.
-        """
-        parsed_url = urlparse(query_string)
-        query_path = parsed_url.path
-        query_params = parse_qs(parsed_url.query)
-        return query_path, query_params
 
     # --- Check functions add error/warning messages in messages list if errors occurs --- #
     def _check_path(self, path):
@@ -97,7 +82,7 @@ class Query:
         """
         Check GET query parameters
         """
-        query_path, query_params = self.parse_query(query_string)
+        query_path, query_params = parse_query(query_string)
 
         # path
         path_error = self._check_path(query_path)
@@ -134,11 +119,9 @@ class Query:
                 return limit_error
 
 
-class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
-    DB_TABLE = 'cats'
-
+class Task4RequestHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        self.query = Query()
+        self.query = GETQuery()
         super().__init__(*args, **kwargs)
 
     def _set_headers(self):
@@ -153,7 +136,7 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _set_sql_query(self, query_params):
         """ Return sql query string from valid query params """
-        query = 'SELECT * FROM {}'.format(self.DB_TABLE)
+        query = 'SELECT * FROM {}'.format(DB_TABLE_NAME)
         # attributes in query string
         if query_params.get('attribute'):
             query += ' ORDER BY '
@@ -181,16 +164,15 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """ Handles GET query """
-        valid_attr_values = db_table_column_names(self.DB_TABLE)
-        cats_number = db_table_size(self.DB_TABLE)
+        valid_attr_values = db_table_column_names(DB_TABLE_NAME)
+        cats_number = db_table_size(DB_TABLE_NAME)
 
         check_error = self.query.check(self.path, valid_attr_values, cats_number)
         if check_error:
             self.response(check_error)
-            return
         else:
             # set sql query
-            query_params = self.query.parse_query(self.path)[1]
+            query_params = parse_query(self.path)[1]
             query = self._set_sql_query(query_params)
 
             # get data from db
@@ -200,11 +182,9 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
             self.response(data)
 
 
-def run():
-    server_address = ('', 8080)
-    httpd = HTTPServer(server_address, WGTestHTTPRequestHandler)
-    httpd.serve_forever()
+def main():
+    run_server(handler=Task4RequestHandler)
 
 
 if __name__ == '__main__':
-    run()
+    main()
