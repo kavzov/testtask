@@ -1,7 +1,7 @@
 import json
 from http.server import BaseHTTPRequestHandler
 from utils import db_query_realdict, db_table_column_names, db_table_size, parse_query, run_server
-from settings import DB_TABLE_NAME
+from settings import CATS_TABLE
 
 
 class GETQuery:
@@ -136,7 +136,7 @@ class Task4RequestHandler(BaseHTTPRequestHandler):
 
     def _set_sql_query(self, query_params):
         """ Return sql query string from valid query params """
-        query = 'SELECT * FROM {}'.format(DB_TABLE_NAME)
+        query = 'SELECT * FROM {}'.format(CATS_TABLE)
         # attributes in query string
         if query_params.get('attribute'):
             query += ' ORDER BY '
@@ -164,12 +164,12 @@ class Task4RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """ Handles GET query """
-        valid_attr_values = db_table_column_names(DB_TABLE_NAME)
-        cats_number = db_table_size(DB_TABLE_NAME)
+        valid_attr_values = db_table_column_names(CATS_TABLE)
+        cats_number = db_table_size(CATS_TABLE)
 
-        check_error = self.query.check(self.path, valid_attr_values, cats_number)
-        if check_error:
-            self.response(check_error)
+        error = self.query.check(self.path, valid_attr_values, cats_number)
+        if error:
+            self.response(error)
         else:
             # set sql query
             query_params = parse_query(self.path)[1]
@@ -182,9 +182,5 @@ class Task4RequestHandler(BaseHTTPRequestHandler):
             self.response(data)
 
 
-def main():
-    run_server(handler=Task4RequestHandler)
-
-
 if __name__ == '__main__':
-    main()
+    run_server(handler=Task4RequestHandler)

@@ -2,8 +2,7 @@ import re
 import json
 from http.server import BaseHTTPRequestHandler
 from utils import db_query, db_table_column_names, dict_to_db, run_server
-from settings import DB_TABLE_NAME
-from task_1 import get_colors
+from settings import CATS_TABLE
 
 
 class POSTQuery:
@@ -91,15 +90,16 @@ class Task5RequestHandler(BaseHTTPRequestHandler):
 
     def _get_valid_attrs(self):
         """ Return allowed attributes list """
-        return db_table_column_names(DB_TABLE_NAME)
+        return db_table_column_names(CATS_TABLE)
 
     def _get_valid_colors(self):
         """ Return allowed colors list """
-        return get_colors()
+        data = db_query('SELECT unnest(enum_range(NULL::cat_color))')
+        return [color[0] for color in data]
 
     def _namesake(self, name):
         """ Check whether cat with the same name already exist in db """
-        return db_query("SELECT name FROM {} WHERE name='{}'".format(DB_TABLE_NAME, name), many=False)
+        return db_query("SELECT name FROM {} WHERE name='{}'".format(CATS_TABLE, name), many=False)
 
     def do_POST(self):
         """ Handles POST request """
@@ -128,13 +128,9 @@ class Task5RequestHandler(BaseHTTPRequestHandler):
 
         # all right - store cat info to db and send success info to client
         # if dict_to_db(DB_TABLE_NAME, post_data_dict):
-        if dict_to_db(DB_TABLE_NAME, post_data_dict):
+        if dict_to_db(CATS_TABLE, post_data_dict):
             self.response("Success: cat {} stored to database".format(post_data_dict['name']))
 
 
-def main():
-    run_server(handler=Task5RequestHandler)
-
-
 if __name__ == '__main__':
-    main()
+    run_server(handler=Task5RequestHandler)

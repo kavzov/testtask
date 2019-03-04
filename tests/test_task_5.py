@@ -1,21 +1,22 @@
 import unittest
 from task_5 import POSTQuery
-from settings import VALID_ATTR_NAMES, VALID_COLORS
 
 
 class TestPostQuery(unittest.TestCase):
 
+    VALID_ATTR_NAMES = ['name', 'color', 'tail_length', 'whiskers_length']
+    VALID_COLORS = ['black', 'white', 'black & white', 'red', 'red & white', 'red & black & white']
     VALID_QUERY = '{"name": "Barsik", "color": "black", "tail_length": 11, "whiskers_length": 20}'
 
     def setUp(self):
         self.obj = POSTQuery()
 
     def assertInvalid(self, error_msg, invalid_query):
-        return self.assertIn(error_msg, self.obj.check(invalid_query, VALID_ATTR_NAMES, VALID_COLORS)['error'])
+        return self.assertIn(error_msg, self.obj.check(invalid_query, self.VALID_ATTR_NAMES, self.VALID_COLORS)['error'])
 
     def test_json(self):
         invalid_json = '{"name": , "color": "black", "tail_length": 15, "whiskers_length": 20}'
-        self.assertTrue(self.obj.check(self.VALID_QUERY, VALID_ATTR_NAMES, VALID_COLORS)['dict'])
+        self.assertTrue(self.obj.check(self.VALID_QUERY, self.VALID_ATTR_NAMES, self.VALID_COLORS)['dict'])
         self.assertInvalid('invalid JSON', invalid_json)
 
     def test_attrs(self):
