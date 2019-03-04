@@ -1,7 +1,7 @@
 import socket
 
 
-def run():
+def main():
     VALID_PATH = '/ping'
 
     # Socket settings
@@ -34,4 +34,4 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    main()
