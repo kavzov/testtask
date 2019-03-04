@@ -1,4 +1,3 @@
-import psycopg2
 import psycopg2.extras
 from utils import db_connect, db_query
 from settings import DB_TABLE_NAME
