@@ -36,31 +36,31 @@ class PostQuery:
         Return dict with POST query as dict and error if occur
         """
         res = {'dict': {}, 'error': ''}
-        # validate json
+        # json
         json_error, post_data_dict = self._check_json(post_data)
         if json_error:
             res['error'] = json_error
             return res
 
-        # validate attributes: all required
+        # attributes: all required
         attrs_error = self._check_attrs(post_data_dict, valid_attrs)
         if attrs_error:
             res['error'] = attrs_error
             return res
 
-        # validate name
+        # name
         if not re.match('^[a-zA-Z][a-zA-Z0-9 -]*$', post_data_dict['name']):
             res['error'] = "Error: invalid name." \
                            "Expected nonempty string contained letters, digits, space and dash symbols"
             return res
 
-        # validate color
+        # color
         if post_data_dict['color'] not in valid_colors:
             res['error'] = "Error: invalid color. Expected exactly these: {}".\
                 format(', '.join("'{}'".format(clr) for clr in valid_colors))
             return res
 
-        # validate tail and whiskers type
+        # tail and whiskers type
         for length in ['tail_length', 'whiskers_length']:
             if not isinstance(post_data_dict[length], int):
                 res['error'] = "Error: {} is not a number".format(length)
@@ -89,8 +89,6 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
     def response(self, content):
         """ Send response to client """
         self.wfile.write(json.dumps(content).encode('utf-8'))
-
-    # ---- POST request handle ---- #
 
     def _get_valid_attrs(self):
         """ Return allowed attributes list """
