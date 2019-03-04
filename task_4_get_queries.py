@@ -29,126 +29,109 @@ class Query:
         return query_path, query_params
 
     # --- Check functions add error/warning messages in messages list if errors occurs --- #
-    def _valid_path(self, path):
+    def _check_path(self, path):
         """ Validate query path and add error message if it invalid """
-        is_valid_path = True
+        # query path must starts with '/cats'
         if not path.startswith(self.VALID_PATH):
-            self.messages.append("Error: invalid path '{}'. Expected '{}'".
-                                 format(path, self.VALID_PATH))
-            is_valid_path = False
-        return is_valid_path
+            return "Error: invalid path '{}'. Expected '{}'".format(path, self.VALID_PATH)
 
-    def _valid_params(self, params):
+    def _check_params(self, params):
         """ Validate every query parameter and add error message for every invalid value """
-        is_valid_params = True
+        # query parameters must be from the valid query parameters list
         for param in params:
             if not (param in self.VALID_QUERY_PARAMS):
-                self.messages.append("Error: invalid query parameter '{}'. Allowed parameters: {}".
-                                     format(param, ', '.join(self.VALID_QUERY_PARAMS)))
-                is_valid_params = False
-        return is_valid_params
+                return "Error: invalid query parameter '{}'. Allowed parameters: {}".\
+                    format(param, ', '.join(self.VALID_QUERY_PARAMS))
 
-    def _valid_attrs(self, attrs, valid_attrs):
+    def _check_attrs(self, attrs, valid_attrs):
         """ Validate every 'attribute' value and add error message for every invalid value """
-        is_valid_attrs = True
+        # values of parameter 'attribute' must be from the valid attributes values list
         for attr in attrs:
             if not (attr in valid_attrs):
-                self.messages.append("Error: invalid attribute '{}'. Allowed attributes: {}".
-                                     format(attr, ', '.join(valid_attrs)))
-                is_valid_attrs = False
-        return is_valid_attrs
+                return "Error: invalid attribute '{}'. Allowed attributes: {}".format(attr, ', '.join(valid_attrs))
 
-    def _valid_order(self, query_params):
+    def _check_order(self, query_params):
         """ Validate 'order' value and add error message for every invalid case """
-        is_valid_order = True
         # 'order' must be only with 'attribute'
         if not query_params.get('attribute'):
-            self.messages.append("Error: 'order' parameter must be only with sorting parameter 'attribute'")
-            is_valid_order = False
+            return "Error: 'order' parameter must be only with sorting parameter 'attribute'"
         else:
             # 'order' must be only one
             if len(query_params['order']) > 1:
-                self.messages.append("Error: {} 'order' parameters given. 1 expected".
-                                     format(len(query_params['order'])))
-                is_valid_order = False
+                return "Error: {} 'order' parameters given. 1 expected".format(len(query_params['order']))
             else:
                 # 'order' must have only 'asc' or 'desc' value
                 order = query_params['order'][0]
                 if not (order in self.VALID_ORDER_VALUES):
-                    self.messages.append("Error: invalid order '{}'. Allowed values: {}.".
-                                         format(order, ', '.join(self.VALID_ORDER_VALUES)))
-                    is_valid_order = False
-        return is_valid_order
+                    return "Error: invalid order '{}'. Allowed values: {}.".\
+                        format(order, ', '.join(self.VALID_ORDER_VALUES))
 
-    def _valid_offset(self, offset_list, cats_number):
+    def _check_offset(self, offset_list, cats_number):
         """ Check 'offset' value and add error message for every invalid case """
-        is_valid_offset = True
         # 'offset' must be only one
         if len(offset_list) > 1:
-            self.messages.append("Error: {} 'offset' parameters given. 1 expected".format(len(offset_list)))
-            is_valid_offset = False
+            return "Error: {} 'offset' parameters given. 1 expected".format(len(offset_list))
         else:
             offset = offset_list[0]
             # 'offset' must be integer
             if not offset.isdigit():
-                self.messages.append("Error: invalid offset '{}'. Integer expected.".format(offset))
-                is_valid_offset = False
+                return "Error: invalid offset '{}'. Integer expected.".format(offset)
             else:
                 # 'offset' must be < records in table otherwise nothing to output
                 if int(offset) >= cats_number:
-                    self.messages.append(
-                        "Warning: There is no results because offset {} greater than the maximum of {}".
+                    return "Warning: There is no results because offset {} greater than the maximum of {}".\
                         format(offset, cats_number - 1)
-                    )
-                    is_valid_offset = False
-        return is_valid_offset
 
-    def _valid_limit(self, limit_list):
+    def _check_limit(self, limit_list):
         """ Check 'limit' value and add error message for every invalid case """
-        is_valid_limit = True
         # 'limit' must be only one
         if len(limit_list) > 1:
-            self.messages.append("Error: {} 'limit' parameters given. 1 expected".format(len(limit_list)))
-            is_valid_limit = False
+            return "Error: {} 'limit' parameters given. 1 expected".format(len(limit_list))
         else:
             limit = limit_list[0]
             # 'limit' must be integer
             if not limit.isdigit():
-                self.messages.append("Error: invalid limit '{}'. Integer expected.".format(limit))
-                is_valid_limit = False
-        return is_valid_limit
+                return "Error: invalid limit '{}'. Integer expected.".format(limit)
 
-    def is_valid(self, query_string, valid_attrs, cats_number):
+    def check(self, query_string, valid_attrs, cats_number):
         """
-        Validate all query parameters
+        Check GET query parameters
         """
-        self.messages = []
         query_path, query_params = self.parse_query(query_string)
 
-        # query path starts with '/cats'
-        self._valid_path(query_path)
+        # path
+        path_error = self._check_path(query_path)
+        if path_error:
+            return path_error
 
-        # query parameters must be from the valid query parameters list
-        self._valid_params(query_params)
+        # parameters
+        params_error = self._check_params(query_params)
+        if params_error:
+            return params_error
 
-        # values of parameter 'attribute' must be from the valid attributes values list
+        # 'attribute' parameter
         if query_params.get('attribute'):
-            self._valid_attrs(query_params['attribute'], valid_attrs)
+            attr_error = self._check_attrs(query_params['attribute'], valid_attrs)
+            if attr_error:
+                return attr_error
 
-        # 'order' must be only with 'attribute' parameter, only one and integer
+        # 'order' parameter
         if query_params.get('order'):
-            self._valid_order(query_params)
+            order_error = self._check_order(query_params)
+            if order_error:
+                return order_error
 
-        # 'offset' must be only one, integer and not greater than records in table
+        # 'offset' parameter
         if query_params.get('offset'):
-            self._valid_offset(query_params['offset'], cats_number)
+            offset_error = self._check_offset(query_params['offset'], cats_number)
+            if offset_error:
+                return offset_error
 
-        # 'limit' must be only one and integer
+        # 'limit' parameter
         if query_params.get('limit'):
-            self._valid_limit(query_params['limit'])
-
-        if not self.messages:
-            return True
+            limit_error = self._check_limit(query_params['limit'])
+            if limit_error:
+                return limit_error
 
 
 class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
@@ -201,7 +184,11 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
         valid_attr_values = db_table_column_names(self.DB_TABLE)
         cats_number = db_table_size(self.DB_TABLE)
 
-        if self.query.is_valid(self.path, valid_attr_values, cats_number):
+        check_error = self.query.check(self.path, valid_attr_values, cats_number)
+        if check_error:
+            self.response(check_error)
+            return
+        else:
             # set sql query
             query_params = self.query.parse_query(self.path)[1]
             query = self._set_sql_query(query_params)
@@ -211,9 +198,6 @@ class WGTestHTTPRequestHandler(BaseHTTPRequestHandler):
 
             # send data to client
             self.response(data)
-        else:
-            self.response(self.query.messages)
-            return
 
 
 def run():
