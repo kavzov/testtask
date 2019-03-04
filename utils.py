@@ -1,8 +1,27 @@
 import psycopg2
 import psycopg2.extras
+from urllib.parse import urlparse, parse_qs
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-def connect():
+def run_server(server_address=('', 8080), handler=BaseHTTPRequestHandler):
+    httpd = HTTPServer(server_address, handler)
+    httpd.serve_forever()
+
+
+def parse_query(query_string):
+    """
+    Parses query string.
+    Return tuple of string query_path, GET query parameters as dict
+    like {'param_name1': ['val1', 'val2'], 'param_name2': ['val1'], ...}.
+    """
+    parsed_url = urlparse(query_string)
+    query_path = parsed_url.path
+    query_params = parse_qs(parsed_url.query)
+    return query_path, query_params
+
+
+def db_connect():
     """ Connect with the WG Forge test database """
     return psycopg2.connect(
         host='localhost',
@@ -15,7 +34,7 @@ def connect():
 
 def db_query(query, many=True):
     """ Query results """
-    with connect() as conn:
+    with db_connect() as conn:
         with conn.cursor() as cur:
             try:
                 cur.execute(query)
@@ -26,7 +45,7 @@ def db_query(query, many=True):
 
 def db_query_realdict(query, many=True):
     """ Query results as dict: {'key': ['val1', 'val2',...], ...} """
-    with connect() as conn:
+    with db_connect() as conn:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             try:
                 cur.execute(query)
@@ -37,7 +56,7 @@ def db_query_realdict(query, many=True):
 
 def db_table_size(table_name):
     """ Count of records in table """
-    with connect() as conn:
+    with db_connect() as conn:
         with conn.cursor() as cur:
             query = 'SELECT COUNT(*) FROM {}'.format(table_name)
             try:
@@ -50,7 +69,7 @@ def db_table_size(table_name):
 
 def db_table_column_names(table_name):
     """ Column names of table """
-    with connect() as conn:
+    with db_connect() as conn:
         with conn.cursor() as cur:
             query = 'SELECT * FROM {}'.format(table_name)
             try:
@@ -68,7 +87,7 @@ def dict_to_db(table, data):
     # convert possible integer values to string
     data = dict((key, str(val)) for key, val in data.items())
 
-    with connect() as conn:
+    with db_connect() as conn:
         with conn.cursor() as cur:
             try:
                 cur.execute(query, data)
