@@ -127,6 +127,7 @@ class Task5RequestHandler(BaseHTTPRequestHandler):
             return
 
         # all right - store cat info to db and send success info to client
+        # if dict_to_db(DB_TABLE_NAME, post_data_dict):
         if dict_to_db(DB_TABLE_NAME, post_data_dict):
             self.response("Success: cat {} stored to database".format(post_data_dict['name']))
 
