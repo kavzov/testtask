@@ -3,7 +3,7 @@ import json
 from http.server import BaseHTTPRequestHandler
 from utils import db_query, db_table_column_names, dict_to_db, run_server
 from settings import DB_TABLE_NAME
-from cats_colors_info import get_colors
+from task_1 import get_colors
 
 
 class POSTQuery:

@@ -1,5 +1,5 @@
 import unittest
-from task_4_get_queries import GETQuery
+from task_4 import GETQuery
 from settings import VALID_ATTR_NAMES
 
 

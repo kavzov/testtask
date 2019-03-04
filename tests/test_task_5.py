@@ -1,5 +1,5 @@
 import unittest
-from task_5_post_query import POSTQuery
+from task_5 import POSTQuery
 from settings import VALID_ATTR_NAMES, VALID_COLORS
 
 
