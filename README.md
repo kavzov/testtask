@@ -9,9 +9,9 @@ Requirements:
 `python 3.6`  
 `psycopg2`
 
-You may pull and run docker image of the repository files:  
+You may pull and run docker image of the repository files:
+
 `docker pull kavzov/wg_tasks`  
-Run:  
 `docker run -it -p 8080:8080 --name tasks --link backenv:localhost kavzov/wg_tasks bash`  
 Use the cli commands inside the 'tasks' container:  
 `task1` - handles cats colors info and fill db with the data  
