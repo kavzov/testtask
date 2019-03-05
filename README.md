@@ -17,7 +17,7 @@ You may pull and run docker image of the repository files:
 
 Use the cli commands inside the 'tasks' container:  
 `task1` - handles cats colors info and fill db with the data  
-`task2` - calculates means, medians and modes of cats tails and whiskers and store the statistics to db  
+`task2` - calculates means, medians and modes of cats tails and whiskers and store the statistics to database  
 `task3` - starts simple http server. The server responses on GET request http://localhost:8080/ping from HTTP client  
 `task4` - starts Python http server and handles GET requests with parameters  
 `task5` - starts Python http server, handles POST requests and stores valid data to the database  
