@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+chmod +x task_* tests/tests.sh
+
 ln -s /testtask/task_1.py /usr/local/bin/task1
 ln -s /testtask/task_2.py /usr/local/bin/task2
 ln -s /testtask/task_3.py /usr/local/bin/task3
