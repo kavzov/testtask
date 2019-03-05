@@ -9,3 +9,5 @@ RUN pip install -r requirements.txt
 ENV PYTHONPATH='/testtask'
 
 RUN chmod +x task_*
+
+RUN settings.sh
