@@ -9,11 +9,11 @@ Requirements:
 `python 3.6`  
 `psycopg2`
 
-Docker image of the repository files:  
-`docker push kavzov/wg_tasks`  
-You may run it by:  
+You may pull and run docker image of the repository files:  
+`docker pull kavzov/wg_tasks`  
+Run:  
 `docker run -it -p 8080:8080 --name tasks --link backenv:localhost kavzov/wg_tasks bash`  
-and use cli commands inside the 'tasks' container:  
+Use the cli commands inside the 'tasks' container:  
 `task1` - handles cats colors info and fill db with the data  
 `task2` - calculates means, medians and modes of cats tails and whiskers and store the statistics to db  
 `task3` - starts simple http server. The server is responses on GET request http://localhost:8080/ping to HTTP client  
