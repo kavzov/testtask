@@ -22,5 +22,5 @@ and use cli commands inside the 'tasks' container:
 `tests` - run unit tests for task 4 and task 5
 
 ---
-[Image page at hub.docker.com](https://cloud.docker.com/u/kavzov/repository/docker/kavzov/wg_tasks)
+[Image at hub.docker.com](https://cloud.docker.com/u/kavzov/repository/docker/kavzov/wg_tasks)
 
