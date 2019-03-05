@@ -7,7 +7,7 @@ Run it:
 
 Requirements:  
 `python 3.6`  
-`psycopg2`  
+`psycopg2`
 
 Docker image of the repository files:  
 `docker push kavzov/wg_tasks`  
