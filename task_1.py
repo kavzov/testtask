@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from collections import Counter
 from utils import db_query, dict_items_to_db
 from settings import CATS_TABLE

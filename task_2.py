@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import statistics
 from collections import Counter
 from utils import db_query_realdict, dict_to_db

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import json
 from http.server import BaseHTTPRequestHandler
 from utils import db_query_realdict, db_table_column_names, db_table_size, parse_query, run_server
