@@ -9,7 +9,6 @@ Requirements:
 `python 3.6`  
 `psycopg2`
 
-
 ---
 [Image page at hub.docker.com](https://cloud.docker.com/u/kavzov/repository/docker/kavzov/wg_tasks)
 
