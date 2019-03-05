@@ -10,7 +10,7 @@ Requirements:
 `psycopg2`
 
 Docker image of the repository files:  
-`docker push kavzov/wg_tasks` 
+`docker push kavzov/wg_tasks`  
 You may run it by:  
 `docker run -it -p 8080:8080 --name tasks --link backenv:localhost kavzov/wg_tasks bash`  
 and use cli commands inside the 'tasks' container:  
