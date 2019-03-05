@@ -16,12 +16,12 @@ You may pull and run docker image of the repository:
 `docker run -it -p 8080:8080 --name tasks --link backenv:localhost kavzov/wg_tasks bash`
 
 Use the cli commands inside the 'tasks' container:  
-`task1` - handles cats colors info and fill database with the data  
-`task2` - calculates means, medians and modes of cats tails and whiskers and store the statistics to database  
-`task3` - starts simple http server. The server responses on GET request http://localhost:8080/ping from HTTP client  
-`task4` - starts Python http server and handles GET requests with parameters  
-`task5` - starts Python http server, handles POST requests and stores valid data to the database  
-`tests` - runs unit tests for task 4 and task 5
+`task1` runs `task_1.py`. It handles cats colors info and fill database with the data  
+`task2` runs `task_2.py`. It calculates means, medians and modes of cats tails and whiskers and store the statistics to database  
+`task3` runs `task_3.py`. It starts simple http server. The server responses on GET request http://localhost:8080/ping from HTTP client  
+`task4` runs `task_4.py`. It starts Python http server and handles GET requests with parameters  
+`task5` runs `task_5.py`. It starts Python http server, handles POST requests and stores valid data to the database  
+`tests` runs unit tests for task 4 and task 5
 
 ---
 [Image at hub.docker.com](https://cloud.docker.com/u/kavzov/repository/docker/kavzov/wg_tasks)
