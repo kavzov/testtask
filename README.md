@@ -20,10 +20,12 @@ Requirements:
 
 You may pull and run docker image of the repository:  
 `docker pull kavzov/wg_tasks`  
-`docker run -it -p 8080:8080 --name tasks --link backenv:localhost kavzov/wg_tasks bash`  
+`docker run -it -p 8080:8080 --name tasks --link backenv:localhost kavzov/wg_tasks bash`
+
 
 and use the cli commands inside the 'tasks' container:  
 `task1` runs `task_1.py`, `task2` runs `task_2.py` etc.  
 `tests` runs unit tests for both of task 4 and task 5.
+
 ---
 [Image at hub.docker.com](https://cloud.docker.com/u/kavzov/repository/docker/kavzov/wg_tasks)
