@@ -20,5 +20,5 @@ To perform it:
 - Start the server:  
 `docker run -d --rm -p 8080:8080 kavzov/nginx-limit-req-sandbox`
 
-- Put the file [load.yaml](https://github.com/kavzov/testtask/blob/master/task_6/load.yaml) to your working directory and start the load test:  
+- Put the file [load.yaml](https://github.com/kavzov/testtask/raw/master/task_6/load.yaml) to your working directory and start the load test:  
 `docker run -v $(pwd):/var/loadtest -v $HOME/.ssh:/root/.ssh --net host --rm -it direvius/yandex-tank`
