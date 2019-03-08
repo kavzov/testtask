@@ -4,8 +4,10 @@ from urllib.parse import urlparse, parse_qs
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-def run_server(server_address=('', 8080), handler=BaseHTTPRequestHandler):
+def run_server(task, server_address=('', 8080), handler=BaseHTTPRequestHandler):
+    message = 'Starting HTTP server for task {}\nQuit the server with Ctrl-C'.format(task)
     httpd = HTTPServer(server_address, handler)
+    print(message)
     httpd.serve_forever()
 
 

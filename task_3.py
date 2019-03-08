@@ -10,6 +10,7 @@ def main():
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.bind(('', 8080))
     server_socket.listen(1)
+    print('Starting HTTP server for task 3\nQuit the server with Ctrl-C')
 
     while True:
         response_msg = 'Cats service. Version 0.1\n'

@@ -184,4 +184,4 @@ class Task4RequestHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == '__main__':
-    run_server(handler=Task4RequestHandler)
+    run_server(task=4, handler=Task4RequestHandler)
