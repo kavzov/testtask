@@ -12,13 +12,13 @@ The graph of HTTP codes shows that when a number of requests exceeds 10 per seco
 
 To perform it:
 - Pull docker image of the server:  
-docker pull kavzov/nginx-limit-req-sandbox
+`docker pull kavzov/nginx-limit-req-sandbox`
 
 - Pull docker image of Yandex.Tank:  
-docker pull direvius/yandex-tank
+`docker pull direvius/yandex-tank`
 
 - Start the server:  
-docker run -d --rm -p 8080:8080 kavzov/nginx-limit-req-sandbox
+`docker run -d --rm -p 8080:8080 kavzov/nginx-limit-req-sandbox`
 
 - Put the file [load.yaml](https://github.com/kavzov/testtask/blob/master/task_6/load.yaml) to your working directory and start the load test:  
-docker run -v $(pwd):/var/loadtest -v $HOME/.ssh:/root/.ssh --net host --rm -it direvius/yandex-tank
+`docker run -v $(pwd):/var/loadtest -v $HOME/.ssh:/root/.ssh --net host --rm -it direvius/yandex-tank`
