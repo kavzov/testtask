@@ -129,7 +129,7 @@ class Task5RequestHandler(BaseHTTPRequestHandler):
 
         # all right - store cat info to db and send success info to client
         if dict_to_db(CATS_TABLE, post_data_dict):
-            self.response("Success: cat {} stored to database".format(post_data_dict['name']))
+            self.response("Success: cat {} added to database".format(post_data_dict['name']))
 
 
 if __name__ == '__main__':
