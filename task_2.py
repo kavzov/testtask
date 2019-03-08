@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import statistics
 from collections import Counter
-from utils import db_query_realdict, dict_to_db
+from utils import db_query_realdict, db_table_size, dict_to_db, reset_table
 
 
 def get_tail_and_whiskers_lengths():
@@ -44,6 +44,7 @@ def get_length_mode(lengths):
 
 
 def main():
+    CATS_STAT_TABLE = 'cats_stat'
     # tails and whiskers lengths
     tails_and_whiskers = get_tail_and_whiskers_lengths()
 
@@ -67,9 +68,14 @@ def main():
     stat['tail_length_mode'] = get_length_mode(tails)
     stat['whiskers_length_mode'] = get_length_mode(whiskers)
 
+    # if is data in the db, reset it
+    stat_info = db_table_size(CATS_STAT_TABLE)
+    if stat_info:
+        reset_table(CATS_STAT_TABLE)
+
     # Store values to db
-    if dict_to_db('cats_stat', stat):
-        print('Statistics have been successfully added to the database')
+    dict_to_db(CATS_STAT_TABLE, stat)
+    print('Statistics have been successfully added to the database')
 
 
 if __name__ == '__main__':
