@@ -110,3 +110,13 @@ def dict_items_to_db(table, columns, data):
                 return True
             except psycopg2.Error as e:
                 print('Psycopg2 error: ', e)
+
+
+def reset_table(table):
+    """ Delete all data from a table """
+    with db_connect() as conn:
+        with conn.cursor() as cur:
+            try:
+                cur.execute('DELETE FROM {}'.format(table))
+            except psycopg2.Error as e:
+                print('Psycopg2 error: ', e)
