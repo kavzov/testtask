@@ -10,7 +10,7 @@ https://overload.yandex.net/167927
 The graph of HTTP codes shows that when a number of requests exceeds 10 per second, the server responses with 429 http code:    
 ![http_codes](http_codes.jpg)
 
-To run it:
+To perform it:
 - Pull docker image of the server:  
 docker pull kavzov/nginx-limit-req-sandbox
 
