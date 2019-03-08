@@ -18,9 +18,9 @@ To perform it:
 `docker pull direvius/yandex-tank`
 
 - Start the server:  
-`docker run -d --rm -p 8080:8080 kavzov/nginx-limit-req-sandbox`
+`docker run -d -p 8080:8080 kavzov/nginx-limit-req-sandbox`
 
 - Put the [load.yaml](https://github.com/kavzov/testtask/raw/master/task_6/load.yaml) file to your working directory and start the load test:  
-`docker run -v $(pwd):/var/loadtest --net host --rm -it direvius/yandex-tank`
+`docker run -it -v $(pwd):/var/loadtest --net host direvius/yandex-tank`
 
 _It is necessary to have an account at [overload.yandex.net](http://overload.yandex.net) to get online statistics of tests._
