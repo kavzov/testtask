@@ -10,10 +10,10 @@ To run the tasks:
 `docker run -it -p 8080:8080 --name tasks --link backenv:localhost kavzov/wg_tasks bash`
 
 Use cli commands inside the 'tasks' container:  
-- `task1` handles cats colors info and fill the database with the data. The results places in the database table 'cat_colors_info'.  
-- `task2` calculates means, medians and modes of cats tails and whiskers and stores the statistics to the database table 'cats_stat'.  
-- `task3` starts socket server. The server responses the GET request of http://localhost:8080/ping.  
-- `task4` starts http server which handles GET requests with parameters from a host HTTP client and send JSON response.  
+- `task1` handles cats colors info and the results are placed in the database.  
+- `task2` calculates means, medians and modes of cats tails and whiskers and stores the statistics to the database.  
+- `task3` starts socket server. The server responses the GET request of http://localhost:8080/ping from a host HTTP client.  
+- `task4` starts http server which handles GET requests with parameters from a host HTTP client and send a JSON response.  
 - `task5` starts http server which handles POST requests from a host HTTP client and adds valid data to the database.  
 - `tests` runs unit tests for both of task 4 and task 5.
 
