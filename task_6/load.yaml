@@ -1,0 +1,11 @@
+phantom:
+  address: 127.0.0.1:8080
+  uris:
+    - /
+  load_profile:
+    load_type: rps
+    schedule: step(5, 25, 5, 5) const (0, 5) step(25, 5, 5, 5) line(5, 35, 1m) const(20, 20)
+console:
+  enabled: true
+telegraf:
+  enabled: false
