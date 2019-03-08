@@ -1,5 +1,5 @@
 # WG Forge test task
-To run the tasks
+To run the tasks:
 - Pull docker image of the environment:  
 `docker pull yzh44yzh/wg_forge_backend_env:1.1`  
 - Pull docker image of the tasks:  
@@ -17,4 +17,4 @@ Use cli commands inside the 'tasks' container:
 `task5` starts Python http server which handles POST requests and stores valid cat data to the database table 'cats'.  
 `tests` runs unit tests for both of task 4 and task 5.
 
-Task 6 are placed in [task_6](https://github.com/kavzov/testtask/tree/master/task_6) directory in text.md file.  
+Task 6 are placed in [task_6](https://github.com/kavzov/testtask/tree/master/task_6) directory in [text.md](https://github.com/kavzov/testtask/blob/master/task_6/text.md) file.  
