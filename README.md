@@ -18,4 +18,4 @@ Use cli commands inside the 'tasks' container:
 -d "{\"name\": \"Tihon\", \"color\": \"red & white\", \"tail_length\": 15, \"whiskers_length\": 12}"` to the database table 'cats'.  
 `tests` runs unit tests for both of task 4 and task 5.
 
-Task 6 are placed in [task_6](https://github.com/kavzov/testtask/tree/master/task_6) directory in [text.md](https://github.com/kavzov/testtask/blob/master/task_6/text.md) file.  
+Task 6 are placed in [task_6](https://github.com/kavzov/testtask/tree/master/task_6) directory in the [text.md](https://github.com/kavzov/testtask/blob/master/task_6/text.md) file.  
