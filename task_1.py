@@ -19,7 +19,8 @@ def main():
         counter[color] += 1
 
     # insert colors info to db
-    dict_items_to_db('cat_colors_info', ('color', 'count'), dict(counter))
+    if dict_items_to_db('cat_colors_info', ('color', 'count'), dict(counter)):
+        print('Cats colors info have been successfully added to the database')
 
 
 if __name__ == '__main__':

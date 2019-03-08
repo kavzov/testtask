@@ -68,7 +68,8 @@ def main():
     stat['whiskers_length_mode'] = get_length_mode(whiskers)
 
     # Store values to db
-    dict_to_db('cats_stat', stat)
+    if dict_to_db('cats_stat', stat):
+        print('Statistics have been successfully added to the database')
 
 
 if __name__ == '__main__':

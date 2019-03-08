@@ -107,5 +107,6 @@ def dict_items_to_db(table, columns, data):
             query = 'INSERT INTO {} {} VALUES %s'.format(table, columns)
             try:
                 psycopg2.extras.execute_values(cur, query, data.items())
+                return True
             except psycopg2.Error as e:
-                print("Psycopg2 error: ", e)
+                print('Psycopg2 error: ', e)
