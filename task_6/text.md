@@ -23,4 +23,4 @@ To perform it:
 - Put the [load.yaml](https://github.com/kavzov/testtask/raw/master/task_6/load.yaml) file to your working directory and start the load test:  
 `docker run -it -v $(pwd):/var/loadtest --net host direvius/yandex-tank`
 
-_It is necessary to have an account at [overload.yandex.net](http://overload.yandex.net) to get online statistics of tests._
+_It is necessary to have an account at [overload.yandex.net](http://overload.yandex.net) and 'overload' section in config file (as described at [Overload documentation](https://overload.yandex.net/mainpage/guide)) to get online statistics of tests._
