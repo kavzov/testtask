@@ -4,8 +4,9 @@ from utils import db_table_size, reset_table
 
 
 tables = {
+    'cats': 'cats',
     'colors': 'cat_colors_info',
-    'lengths': 'cats_stat',
+    'stat': 'cats_stat',
 }
 
 
