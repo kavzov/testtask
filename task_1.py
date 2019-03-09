@@ -19,14 +19,18 @@ def main():
     for color in cats_colors:
         counter[color] += 1
 
+    msg = 'Cats color info have been '
     # if is data in the db, reset it
     colors_info = db_table_size(CATS_COLORS_TABLE)
     if colors_info:
         reset_table(CATS_COLORS_TABLE)
+        msg += 'updated'
+    else:
+        msg += 'added to the database'
 
-    # insert colors info to db
+    # add or update colors info in the database
     dict_items_to_db(CATS_COLORS_TABLE, ('color', 'count'), dict(counter))
-    print('Cats colors info have been successfully added to the database')
+    print(msg)
 
 
 if __name__ == '__main__':

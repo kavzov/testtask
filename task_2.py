@@ -68,14 +68,18 @@ def main():
     stat['tail_length_mode'] = get_length_mode(tails)
     stat['whiskers_length_mode'] = get_length_mode(whiskers)
 
+    msg = 'Statistics have been '
     # if is data in the db, reset it
     stat_info = db_table_size(CATS_STAT_TABLE)
     if stat_info:
         reset_table(CATS_STAT_TABLE)
+        msg += 'updated'
+    else:
+        msg += 'added to the database'
 
-    # Store values to db
+    # Add or update statistics in the database
     dict_to_db(CATS_STAT_TABLE, stat)
-    print('Statistics have been successfully added to the database')
+    print(msg)
 
 
 if __name__ == '__main__':
