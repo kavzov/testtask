@@ -5,9 +5,7 @@ from utils import db_table_size, reset_table
 
 tables = {
     'colors': 'cat_colors_info',
-    'task1': 'cat_colors_info',
     'lengths': 'cats_stat',
-    'task2': 'cats_stat'
 }
 
 
