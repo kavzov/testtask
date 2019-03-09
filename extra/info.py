@@ -66,7 +66,7 @@ def print_item_lines(item, data):
             if first_line:
                 hr = get_hr(line_len, '=')
                 print(hr)
-                print(item['line'].format(**{k: k.capitalize() for k in obj.keys()}))
+                print(item['line'].format(**{k: conv_title(k) for k in obj.keys()}))
                 print(hr)
             if not data:
                 return
