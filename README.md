@@ -19,9 +19,9 @@ Use cli commands inside the 'tasks' container:
 There are some optional handy commands:  
 - `info cats` shows content of the 'cats' table  
 - `info colors` shows content of the 'cat_colors_info' table  
-- `info lengths` shows content of the 'cats_stat' table
+- `info stat` shows content of the 'cats_stat' table
 - `clear cats` delete data from the 'cats' table  
 - `clear colors` delete data from the 'cat_colors_info' table  
-- `clear lengths` delete data from the 'cats_stat' table
+- `clear stat` delete data from the 'cats_stat' table
   
 Task 6 are placed in the [task_6](https://github.com/kavzov/testtask/tree/master/task_6) directory in the [text.md](https://github.com/kavzov/testtask/blob/master/task_6/text.md) file.  
