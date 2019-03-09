@@ -13,7 +13,7 @@ def main():
     print('Starting HTTP server for task 3\nQuit the server with Ctrl-C')
 
     while True:
-        response_msg = 'Cats service. Version 0.1\n'
+        response_msg = 'HTTP/1.1 200 OK\n\n'
 
         # Receive data from client socket
         client_socket = server_socket.accept()[0]
@@ -26,8 +26,8 @@ def main():
             path = None
 
         # if path is not '/ping' set empty response message
-        if path != VALID_PATH:
-            response_msg = '\n'
+        if path == VALID_PATH:
+            response_msg += 'Cats service. Version 0.1\n'
 
         # Send message to client
         client_socket.send(response_msg.encode('utf-8'))
