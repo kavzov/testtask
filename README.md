@@ -16,4 +16,12 @@ Use cli commands inside the 'tasks' container:
 - `task5` fires up the server that handles POST requests from a host HTTP client and adds valid data to the database.  
 - `tests` runs unit tests for both of the task 4 and the task 5.
 
+There are some optional handy commands:  
+- `info cats` shows content of the 'cats' table  
+- `info colors` shows content of the 'cat_colors_info' table  
+- `info lengths` shows content of the 'cats_stat' table
+- `clear cats` delete data from the 'cats' table  
+- `clear colors` delete data from the 'cat_colors_info' table  
+- `clear lengths` delete data from the 'cats_stat' table
+  
 Task 6 are placed in the [task_6](https://github.com/kavzov/testtask/tree/master/task_6) directory in the [text.md](https://github.com/kavzov/testtask/blob/master/task_6/text.md) file.  
