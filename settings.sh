@@ -10,5 +10,5 @@ ln -s /wg_test_tasks/task_4.py /usr/local/bin/task5
 
 ln -s /wg_test_tasks/tests/tests.sh /usr/local/bin/tests
 
-ln -s /wg_test_tasks/extra/clear.py /usr/local/bin/clear
-ln -s /wg_test_tasks/extra/info.py /usr/local/bin/info
+ln -s /wg_test_tasks/extra/clear.py /usr/local/bin/del
+ln -s /wg_test_tasks/extra/info.py /usr/local/bin/inf
