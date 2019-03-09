@@ -19,13 +19,13 @@ def main():
         client_socket = server_socket.accept()[0]
         data = client_socket.recv(1024).decode('utf-8')
 
-        # Get request path from request headers
+        # Get request path from the request headers
         try:
             path = data.split(' ')[1]
         except (AttributeError, IndexError):
             path = None
 
-        # if path is not '/ping' set empty response message
+        # Set response message. It stay blank if invalid path
         if path == VALID_PATH:
             response_msg += 'Cats service. Version 0.1\n'
 
