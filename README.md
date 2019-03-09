@@ -11,9 +11,9 @@ To run the tasks:
 Use cli commands inside the 'tasks' container:  
 - `task1` performs task 1. It handles cats colors info and adds the results to the database.  
 - `task2` performs task 2. It calculates means, medians and modes of the cats tails and whiskers. The results are placed to the database.  
-- `task3` starts socket server. The server responses the GET request of http://localhost:8080/ping from a host HTTP client.  
-- `task4` starts http server that handles GET requests with parameters from a host HTTP client and send back a JSON response.  
-- `task5` starts http server that handles POST requests from a host HTTP client and adds valid data to the database.  
-- `tests` runs unit tests for both of task 4 and task 5.
+- `task3` fires up the socket server. The server responses the GET request of http://localhost:8080/ping from a host HTTP client.  
+- `task4` fires up the server that handles GET requests with parameters from a host HTTP client and send back a JSON response.  
+- `task5` fires up the server that handles POST requests from a host HTTP client and adds valid data to the database.  
+- `tests` runs unit tests for both of the task 4 and the task 5.
 
 Task 6 are placed in the [task_6](https://github.com/kavzov/testtask/tree/master/task_6) directory in the [text.md](https://github.com/kavzov/testtask/blob/master/task_6/text.md) file.  
