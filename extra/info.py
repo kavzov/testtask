@@ -6,16 +6,19 @@ from utils import db_query_realdict
 items = {
     'cats': {
         'title': 'cats',
+        'header': 'Cats',
         'table': 'cats',
         'line': '| {name:8}  | {color:20} |  {tail_length:^11} |  {whiskers_length:^16} |'
     },
     'colors': {
         'title': 'colors',
+        'header': 'Cat colors',
         'table': 'cat_colors_info',
         'line': '| {color:20}  | {count:^5} |'
     },
-    'lengths': {
+    'stat': {
         'title': 'lengths',
+        'header': 'Lengths statistics',
         'table': 'cats_stat',
         'line': '| {:23} |  {:^7}  |'
     }
@@ -23,6 +26,7 @@ items = {
 
 
 def conv_title(title):
+    """ Converts 'solid_string' to 'Solid string' """
     return title.replace('_', ' ').capitalize()
 
 
@@ -34,19 +38,17 @@ def conv_list(val):
 
 
 def get_many(item):
+    """ Return parameter 'many' for db query. Single record has only 'cats_stat' table """
     return item != 'lengths'
 
 
 def get_hr(line_len, sign='-'):
+    """ Return horizontal line with 'line_len' of 'sign' """
     return '+{}+'.format(sign * line_len)
 
 
-def print_header(item):
-    print()
-    print(item['title'].capitalize())
-
-
 def print_item_lines(item, data):
+    """ Displays line by line every record of a item data """
     first_line = True
     if item['title'] == 'lengths':
         line_len = len(item['line'].format('', '')) - 2
@@ -68,8 +70,6 @@ def print_item_lines(item, data):
                 print(hr)
                 print(item['line'].format(**{k: conv_title(k) for k in obj.keys()}))
                 print(hr)
-            if not data:
-                return
             hr = get_hr(line_len)
             print(item['line'].format(**obj))
             print(hr)
@@ -77,12 +77,13 @@ def print_item_lines(item, data):
 
 
 def print_item(item):
+    """ Displays the table with items info """
     data = db_query_realdict('SELECT * FROM {}'.format(item['table']), many=get_many(item['title']))
     if not data:
         print('There is no {} info in the database'.format(item['title']))
         return
 
-    print_header(item)
+    print('\n{}'.format(item['header']))
     print_item_lines(item, data)
     print()
 
