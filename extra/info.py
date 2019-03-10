@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import re
 import sys
 from utils import db_query_realdict
 
@@ -6,21 +7,21 @@ from utils import db_query_realdict
 items = {
     'cats': {
         'title': 'cats',
-        'header': 'Cats',
+        'header': 'cats',
         'table': 'cats',
-        'line': '| {name:8}  | {color:20} |  {tail_length:^11} |  {whiskers_length:^16} |'
+        'line': '| {name:9} | {color:20} | {tail_length:^12} | {whiskers_length:^16} |'
     },
     'colors': {
         'title': 'colors',
-        'header': 'Cat colors',
+        'header': 'cat colors',
         'table': 'cat_colors_info',
-        'line': '| {color:20}  | {count:^5} |'
+        'line': '| {color:21} | {count:^5} |'
     },
     'stat': {
         'title': 'lengths',
-        'header': 'Lengths statistics',
+        'header': 'statistics',
         'table': 'cats_stat',
-        'line': '| {:23} |  {:^7}  |'
+        'line': '| {:23} | {:^8} |'
     }
 }
 
@@ -42,35 +43,38 @@ def get_many(item):
     return item != 'lengths'
 
 
-def get_hr(line_len, sign='-'):
-    """ Return horizontal line with 'line_len' of 'sign' """
-    return '+{}+'.format(sign * line_len)
+def get_hr(string, sign='-'):
+    """ Return horizontal line """
+    cross = '+'
+    lengths = map(int, re.findall(r'\d+', string))
+    line = cross
+    for l in lengths:
+        line += sign*(l+2) + cross
+    return line
 
 
 def print_item_lines(item, data):
-    """ Displays line by line every record of a item data """
+    """ Displays line by line every record of an item data """
     first_line = True
     if item['title'] == 'lengths':
-        line_len = len(item['line'].format('', '')) - 2
         for title, value in data.items():
             if first_line:
-                hr = get_hr(line_len, '=')
+                hr = get_hr(item['line'], '=')
                 print(hr)
                 print(item['line'].format('Parameter', 'Value'))
                 print(hr)
-            hr = get_hr(line_len)
+            hr = get_hr(item['line'])
             print(item['line'].format(conv_title(title), conv_list(value)))
             print(hr)
             first_line = False
     else:
-        line_len = len(item['line'].format(**data[0])) - 2
         for obj in data:
             if first_line:
-                hr = get_hr(line_len, '=')
+                hr = get_hr(item['line'], '=')
                 print(hr)
                 print(item['line'].format(**{k: conv_title(k) for k in obj.keys()}))
                 print(hr)
-            hr = get_hr(line_len)
+            hr = get_hr(item['line'])
             print(item['line'].format(**obj))
             print(hr)
             first_line = False
@@ -80,10 +84,10 @@ def print_item(item):
     """ Displays the table with items info """
     data = db_query_realdict('SELECT * FROM {}'.format(item['table']), many=get_many(item['title']))
     if not data:
-        print('There is no {} info in the database'.format(item['title']))
+        print('There is no {} data in the database'.format(item['header']))
         return
 
-    print('\n{}'.format(item['header']))
+    print('\n{}'.format(item['header'].capitalize()))
     print_item_lines(item, data)
     print()
 
