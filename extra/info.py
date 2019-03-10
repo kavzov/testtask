@@ -9,19 +9,19 @@ items = {
         'title': 'cats',
         'header': 'cats',
         'table': 'cats',
-        'line': '| {name:9} | {color:20} | {tail_length:^12} | {whiskers_length:^16} |'
+        'string': '| {name:9} | {color:20} | {tail_length:^12} | {whiskers_length:^16} |'
     },
     'colors': {
         'title': 'colors',
         'header': 'cat colors',
         'table': 'cat_colors_info',
-        'line': '| {color:21} | {count:^5} |'
+        'string': '| {color:21} | {count:^5} |'
     },
     'stat': {
         'title': 'lengths',
         'header': 'statistics',
         'table': 'cats_stat',
-        'line': '| {:23} | {:^8} |'
+        'string': '| {parameter:23} | {value:^8} |'
     }
 }
 
@@ -43,52 +43,49 @@ def get_many(item):
     return item != 'lengths'
 
 
-def get_hr(string, sign='-'):
-    """ Return horizontal line """
-    cross = '+'
-    lengths = map(int, re.findall(r'\d+', string))
-    line = cross
+def get_hr(str_ptn, sign='~'):
+    """ Horizontal line """
+    CROSS = '+'
+    # set list of cell widths from an item string pattern
+    lengths = map(int, re.findall(r'\d+', str_ptn))
+    line = CROSS
     for l in lengths:
-        line += sign*(l+2) + cross
+        line += sign*(l+2) + CROSS
     return line
 
 
-def print_item_lines(item, data):
-    """ Displays line by line every record of an item data """
+def print_string(str_ptn, obj, hr):
+    """ Prints a single table string """
+    print(str_ptn.format(**obj))
+    print(hr)
+
+
+def print_item_strings(item, data):
+    """ Prints string by string an item data """
     first_line = True
     if item['title'] == 'lengths':
-        for title, value in data.items():
-            if first_line:
-                hr = get_hr(item['line'], '=')
-                print(hr)
-                print(item['line'].format('Parameter', 'Value'))
-                print(hr)
-            hr = get_hr(item['line'])
-            print(item['line'].format(conv_title(title), conv_list(value)))
+        # Because 'lengths' is a single dict record, convert it to list of dicts like 'cats' and 'colors' to proper display
+        data = [{'parameter': conv_title(item[0]), 'value': conv_list(item[1])} for item in data.items()]
+    for obj in data:
+        if first_line:
+            hr = get_hr(item['string'], '=')
+            header = {k: conv_title(k) for k in obj.keys()}
             print(hr)
-            first_line = False
-    else:
-        for obj in data:
-            if first_line:
-                hr = get_hr(item['line'], '=')
-                print(hr)
-                print(item['line'].format(**{k: conv_title(k) for k in obj.keys()}))
-                print(hr)
-            hr = get_hr(item['line'])
-            print(item['line'].format(**obj))
-            print(hr)
-            first_line = False
+            print_string(item['string'], header, hr)
+        hr = get_hr(item['string'])
+        print_string(item['string'], obj, hr)
+        first_line = False
 
 
-def print_item(item):
-    """ Displays the table with items info """
+def display_item(item):
+    """ Displays the table with items data """
     data = db_query_realdict('SELECT * FROM {}'.format(item['table']), many=get_many(item['title']))
     if not data:
         print('There is no {} data in the database'.format(item['header']))
         return
 
     print('\n{}'.format(item['header'].capitalize()))
-    print_item_lines(item, data)
+    print_item_strings(item, data)
     print()
 
 
@@ -102,7 +99,8 @@ def main():
     except KeyError:
         print('Error: unknown parameter "{}"'.format(arg))
         return
-    print_item(item)
+
+    display_item(item)
 
 
 if __name__ == '__main__':
