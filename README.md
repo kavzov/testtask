@@ -24,8 +24,8 @@ Here are some optional handy commands:
 - `inf cats` shows content of the 'cats' table  
 - `inf colors` shows content of the 'cat_colors_info' table  
 - `inf stat` shows content of the 'cats_stat' table
-- `del cats` delete data from the 'cats' table  
-- `del colors` delete data from the 'cat_colors_info' table  
-- `del stat` delete data from the 'cats_stat' table
+- `del cats` clears the 'cats' table  
+- `del colors` clears the 'cat_colors_info' table  
+- `del stat` clears the 'cats_stat' table
   
 Task 6 are placed in the [task_6](https://github.com/kavzov/testtask/tree/master/task_6) directory in the [text.md](https://github.com/kavzov/testtask/blob/master/task_6/text.md) file.  
