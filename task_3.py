@@ -22,7 +22,7 @@ def main():
         # Get request path from the request headers
         try:
             path = data.split(' ')[1]
-        except (AttributeError, IndexError):
+        except IndexError:
             path = None
 
         # Set response message. It stay blank if invalid path
