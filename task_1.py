@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from collections import Counter
 from utils import db_query_realdict, dict_items_to_db, db_table_size, reset_table
 from settings import CATS_TABLE
 
