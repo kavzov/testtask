@@ -7,7 +7,7 @@ def main():
     CATS_COLORS_TABLE = 'cat_colors_info'
 
     # get list of dicts {color: count}
-    data = db_query_realdict('SELECT color, COUNT(*) FROM {} GROUP BY color'.format(CATS_TABLE))
+    data = db_query_realdict('SELECT color, COUNT(*) FROM {} GROUP BY color ORDER BY color DESC'.format(CATS_TABLE))
 
     # convert to one dict (for dict_items_to_db())
     counters = {d['color']: d['count'] for d in data}
