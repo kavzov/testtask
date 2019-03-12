@@ -7,7 +7,7 @@ session = AsyncSession()
 
 
 async def main():
-    SESSION_TIME = 5
+    SESSION_TIME = 10
     cnt_total = 0   # Total requests
     cnt_200 = 0     # Count of 200 responses
     cnt_429 = 0     # 429
@@ -20,7 +20,7 @@ async def main():
         if total_time >= SESSION_TIME:
             break
 
-        resp = await session.get('http://localhost:8080/')
+        resp = await session.get('http://localhost:8080/cats')
 
         cnt_total += 1
         if resp.status_code == 200:
