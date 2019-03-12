@@ -1,4 +1,12 @@
 ### Task 6
+
+##### Script
+It can be tested with a self written script like [this](https://github.com/kavzov/testtask/raw/master/task_6/task_6.py).
+
+To perform it:
+ 
+ 
+##### Load testing tools 
 It can be tested with a load testing tool such as jMeter, Yandex.Tank, Taurus etc.
 
 Here is the simple example of such a test.  
