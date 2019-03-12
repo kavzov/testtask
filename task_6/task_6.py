@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from requests_threads import AsyncSession
 from time import time
 
