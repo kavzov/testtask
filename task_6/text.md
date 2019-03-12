@@ -5,10 +5,10 @@ Here are two examples of each of them.
 They are uses Nginx server, configured to limit with 600 requests per minute.  
 
 #### Script
-Here is the example of a test with using script like [this](https://github.com/kavzov/testtask/raw/master/task_6/task_6.py).
+Here is the example of a test using the [script](https://github.com/kavzov/testtask/raw/master/task_6/task_6.py).
 
-The script starts sending requests (within 10 seconds) to `http://localhost:8080/cats` and there will be the statistics in the console.  
-After the task completing, you'll see the statistics of the total count of requests and the responses corresponding to status codes.  
+It sending requests within 10 seconds to `http://localhost:8080/cats` and there will be the statistics in the console.  
+After the script completing, you'll see the statistics of the total count of requests and the responses corresponding to status codes.  
 It shows that the server responses with code 200 only to 10 requests per second, and for the others requests it responses with 429 http code.  
 
 If you'll try to send request from the host like `curl -X GET http://localhost:8080/cats`, during the script performing, you will receive a 429 error.
