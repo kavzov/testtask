@@ -20,11 +20,8 @@ To perform the script:
 - Run it:  
 `docker run -d -p 8080:8080 --name nginx kavzov/nginx-limit-req-sandbox:noburst`
 
-- Run docker image of the tasks in console mode:  
-`docker run -it --link nginx:localhost kavzov/wg_tasks bash`
- 
-- Inside the tasks container run the command:  
-`task6`  
+- Run the script in the container:  
+`docker run -it --rm --link nginx:localhost kavzov/wg_tasks task6`
  
 #### Load testing tools 
 It also can be tested with a load testing tool such as jMeter, Yandex.Tank, Taurus etc.
