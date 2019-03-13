@@ -2,18 +2,18 @@
 
 It can be tested with a self written script or using a load testing tool.  
 Here are two examples of each of them.  
-They are uses Nginx server, configured to limit with 600 requests per minute.  
+They use Nginx server, configured to limit with 600 requests per minute.  
 
 #### Script
-Here is the example of a test using the [script](https://github.com/kavzov/testtask/raw/master/task_6/task_6.py).
+Here is the example of the test using the [script](https://github.com/kavzov/testtask/raw/master/task_6/task_6.py).
 
 It sending requests within 10 seconds to `http://localhost:8080/cats` and there the statistics in the console.  
 After the script completing, you'll see the statistics of the total count of requests and the responses corresponding to status codes.  
 It shows that the server responses with code 200 only to 10 requests per second, and for the others requests it responses with 429 http code.  
 
-If you'll try to send the request `curl -X GET http://localhost:8080/cats` from the host, during the script performing, you will receive  429 error.
+If you try to send the request `curl -X GET http://localhost:8080/cats` from the host, during the script performing, you'll receive  429 error.
 
-To perform it:  
+To perform the script:  
 - Pull docker image of the server:  
 `docker pull kavzov/nginx-limit-req-sandbox:noburst`
 
